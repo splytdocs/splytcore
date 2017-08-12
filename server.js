@@ -75,6 +75,8 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedi
 var listings = require('./listings/listingController');
 app.get('/api/listings/search', listings.search);
 app.get('/api/listings/:id',    listings.getById);
+app.post('/api/listings/',      listings.postNew);
+app.delete('/api/listings/:id', listings.delete);
 
 // Production error handler
 if (app.get('env') === 'production') {

@@ -40,3 +40,29 @@ exports.getById = function(req, res, next) {
   });
   results.catch((error)=>res.status(500).json(error));
 };
+exports.postNew = function(req, res, next) {
+  // todo: validation
+  // todo: probably more complex when adding to a block chain
+  const newListing = req.body;
+  const results = repo.addNew(newListing);
+  results.then((data)=> {
+    res.status(201).json(data);
+  });
+  results.catch((error)=>res.status(500).json(error));
+};
+exports.delete = function(req, res, next) {
+  req.assert('id', 'id cannot be blank').notEmpty();
+  // todo: validation
+  // todo: require application/json
+  // todo: Ensure that user deleting this actually owns the listing
+  const id = req.params.id;
+  const results = repo.deactivate(id);
+  results.then((data)=> {
+    if(data) {
+      res.status(200).json(data);
+    } else {
+      res.status(404).send(`Listing '${id}' not found.`)
+    }
+  });
+  results.catch((error)=>res.status(500).json(error));
+};
