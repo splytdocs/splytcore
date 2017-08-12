@@ -71,6 +71,9 @@ app.get('/auth/google', passport.authenticate('google', { scope: 'profile email'
 app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
 app.get('/auth/twitter', passport.authenticate('twitter'));
 app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
+//todo: improve this
+app.get('/api/listings/search', 
+  require('./listings/listingController').search);
 
 // Production error handler
 if (app.get('env') === 'production') {
