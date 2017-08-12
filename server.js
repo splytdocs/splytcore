@@ -72,8 +72,9 @@ app.get('/auth/google/callback', passport.authenticate('google', { successRedire
 app.get('/auth/twitter', passport.authenticate('twitter'));
 app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
 //todo: improve this
-app.get('/api/listings/search', 
-  require('./listings/listingController').search);
+var listings = require('./listings/listingController');
+app.get('/api/listings/search', listings.search);
+app.get('/api/listings/:id',    listings.getById);
 
 // Production error handler
 if (app.get('env') === 'production') {

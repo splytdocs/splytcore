@@ -4,3 +4,9 @@ exports.search = function(query) {
     resolve(all);
   });
 };
+exports.findById = function(id) {
+  return new Promise((resolve, reject)=>{
+    const found = all.find(i=>i.id==id);
+    resolve(found);
+  });
+}
