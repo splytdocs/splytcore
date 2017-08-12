@@ -15,9 +15,10 @@ var passport = require('passport');
 dotenv.load();
 
 // Controllers
-var HomeController = require('./controllers/home');
-var userController = require('./controllers/user');
-var contactController = require('./controllers/contact');
+var HomeCont = require('./controllers/home');
+var userCont = require('./controllers/user');
+var contactCont = require('./controllers/contact');
+var listingCont = require('./controllers/listing');
 
 // Passport OAuth strategies
 require('./config/passport');
@@ -49,28 +50,31 @@ app.use(function(req, res, next) {
 });
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', HomeController.index);
-app.get('/contact', contactController.contactGet);
-app.post('/contact', contactController.contactPost);
-app.get('/account', userController.ensureAuthenticated, userController.accountGet);
-app.put('/account', userController.ensureAuthenticated, userController.accountPut);
-app.delete('/account', userController.ensureAuthenticated, userController.accountDelete);
-app.get('/signup', userController.signupGet);
-app.post('/signup', userController.signupPost);
-app.get('/login', userController.loginGet);
-app.post('/login', userController.loginPost);
-app.get('/forgot', userController.forgotGet);
-app.post('/forgot', userController.forgotPost);
-app.get('/reset/:token', userController.resetGet);
-app.post('/reset/:token', userController.resetPost);
-app.get('/logout', userController.logout);
-app.get('/unlink/:provider', userController.ensureAuthenticated, userController.unlink);
+app.get('/', HomeCont.index);
+app.get('/contact', contactCont.contactGet);
+app.post('/contact', contactCont.contactPost);
+app.get('/account', userCont.ensureAuthenticated, userCont.accountGet);
+app.put('/account', userCont.ensureAuthenticated, userCont.accountPut);
+app.delete('/account', userCont.ensureAuthenticated, userCont.accountDelete);
+app.get('/signup', userCont.signupGet);
+app.post('/signup', userCont.signupPost);
+app.get('/login', userCont.loginGet);
+app.post('/login', userCont.loginPost);
+app.get('/forgot', userCont.forgotGet);
+app.post('/forgot', userCont.forgotPost);
+app.get('/reset/:token', userCont.resetGet);
+app.post('/reset/:token', userCont.resetPost);
+app.get('/logout', userCont.logout);
+app.get('/unlink/:provider', userCont.ensureAuthenticated, userCont.unlink);
 app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
 app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/login' }));
 app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
 app.get('/auth/twitter', passport.authenticate('twitter'));
 app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
+app.get('/listing', listingCont.readListings);
+app.post('/listing', listingCont.createListing);
+app.get('/listing/:listingId', listingCont.getlisting)
 
 // Production error handler
 if (app.get('env') === 'production') {
