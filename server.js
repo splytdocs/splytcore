@@ -72,9 +72,13 @@ app.get('/auth/google', passport.authenticate('google', { scope: 'profile email'
 app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
 app.get('/auth/twitter', passport.authenticate('twitter'));
 app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
-app.get('/listing', listingCont.readListings);
-app.post('/listing', listingCont.createListing);
-app.get('/listing/:listingId', listingCont.getlisting)
+
+//todo: improve this
+var listings = require('./listings/listingController');
+app.get('/api/listings/search', listings.search);
+app.get('/api/listings/:id',    listings.getById);
+app.post('/api/listings/',      listings.postNew);
+app.delete('/api/listings/:id', listings.delete);
 
 // Production error handler
 if (app.get('env') === 'production') {
