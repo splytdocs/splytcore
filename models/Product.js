@@ -8,8 +8,12 @@ var schemaOptions = {
 };
 
 var Product = new mongoose.Schema({
-  title:{
+  title: {
     type: String, 
+    required: true,
+  },
+  description: {
+    type: String,
     required: true,
   },
   term: {
@@ -17,7 +21,6 @@ var Product = new mongoose.Schema({
     min: 0,
     max: 365,
     required: true,
-    
   },
   termType: {
     type: String,
@@ -27,7 +30,12 @@ var Product = new mongoose.Schema({
   totalPrice: {
     type: Number,
     required: true
-  }
+  },
+  location: {
+    type: [Number],
+    index: '2d',
+    required: true
+  },
 }, schemaOptions);
 
 var Product = mongoose.model('Product', productSchema);

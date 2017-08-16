@@ -18,7 +18,6 @@ dotenv.load();
 var HomeCont = require('./controllers/home');
 var userCont = require('./controllers/user');
 var contactCont = require('./controllers/contact');
-var listingCont = require('./controllers/listing');
 
 // Passport OAuth strategies
 require('./config/passport');
@@ -75,9 +74,9 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedi
 
 //todo: improve this
 var listings = require('./listings/listingController');
+app.post('/api/listings/',      listings.create);
 app.get('/api/listings/search', listings.search);
 app.get('/api/listings/:id',    listings.getById);
-app.post('/api/listings/',      listings.postNew);
 app.delete('/api/listings/:id', listings.delete);
 
 // Production error handler

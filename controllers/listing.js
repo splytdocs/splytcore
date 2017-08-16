@@ -1,7 +1,7 @@
 /**
  * GET /listing
  */
-exports.listingGet = function(req, res) {
+exports.search = function(req, res) {
 
   // TODO: Get all listing from DB and pass it to the render here
   res.render('listing', {
@@ -20,3 +20,4 @@ exports.listingPost = function(req, res) {
     res.redirect('/listing');
   });
 };
+
