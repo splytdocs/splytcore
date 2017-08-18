@@ -2,6 +2,7 @@ var crypto = require('crypto');
 var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var schemaOptions = {
   timestamps: true,
@@ -11,7 +12,7 @@ var schemaOptions = {
 };
 
 var assetSchema = new mongoose.Schema({
-  id: { type: Schema.Types.ObjectId, default: new ObjectId(), required: true },
+  id: { type: ObjectId, default: new ObjectId(), required: true },
   // todo: revisit this, how should we store photos and their data? Probably just store a relative uri here
   photoUri: { type: String, required: false }, 
   // todo: What about physical assets like season tickets?

@@ -1,13 +1,20 @@
-var ListingSource = require("./MockDataRepository");
 var geolib = require("geolib");
-var repo = ListingSource;
+var repo = require("./MongoDbRepository");
+var mongoose = require('mongoose');
+
+function getUserFromContext(req) {
+  return {
+    id:mongoose.Types.ObjectId('56cb91bdc3464f14678934ca'),
+    name:"Fakerton McNotreal"
+  }; // Just use a fake person until we get auth* worked out
+};
 
 function mapWithDistance(to, from) {
-    const distance = geolib.getDistance(to, from);
-    return Object.assign({}, {
-      distance: distance
-    }, to);
-  }
+  const distance = geolib.getDistance(to, from);
+  return Object.assign({}, {
+    distance: distance
+  }, to);
+}
 //get /listings/search?location&sort&order&limit
 exports.search = function(req, res, next) {
   const from = {
@@ -40,11 +47,18 @@ exports.getById = function(req, res, next) {
   });
   results.catch((error)=>res.status(500).json(error));
 };
-exports.postNew = function(req, res, next) {
+exports.create = function(req, res, next) {
+  
   // todo: validation
   // todo: probably more complex when adding to a block chain
   const newListing = req.body;
-  const results = repo.addNew(newListing);
+  const listingUser = getUserFromContext(req);
+  console.log("create:", newListing, listingUser);
+  const listingRequest = {
+    listing:newListing,
+    user:listingUser
+  };
+  const results = repo.addNew(listingRequest);
   results.then((data)=> {
     res.status(201).json(data);
   });
