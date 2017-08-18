@@ -1,0 +1,86 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Splyt",
+		"_postman_id": "9808b28d-488d-d563-61d9-f15fde0852bf",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET One (200)",
+			"request": {
+				"url": "http://localhost:3000/api/listings/59966259fc13ae4033000bd6",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET One (404)",
+			"request": {
+				"url": "http://localhost:3000/api/listings/xyz",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Search",
+			"request": {
+				"url": "http://localhost:3000/api/listings/search",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "POST (Create listing, 201)",
+			"request": {
+				"url": "http://localhost:3000/api/listings/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location\": {\n    \"latitude\": 40.6280245,\n    \"longitude\": 117.2536039\n  },\n  \"asset\": {\n    \"term\": 317,\n    \"termType\": \"WEEKLY\",\n    \"totalPrice\": 97706,\n    \"title\": \"Sed accumsan felis. Ut at dolor quis odio consequat varius. Integer ac leo. Pellentesque ultrices mattis odio.\"\n  }\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE (200) (deactivate)",
+			"request": {
+				"url": "http://localhost:3000/api/listings/5996625efc13ae403300178b",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE (400)",
+			"request": {
+				"url": "http://localhost:3000/api/listings/xyz",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
