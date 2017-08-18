@@ -80,6 +80,10 @@ body-parser@^1.15.1:
     raw-body "~2.2.0"
     type-is "~1.6.15"
 
+bson-objectid@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/bson-objectid/-/bson-objectid-1.1.5.tgz#4b9e210a98c1c4eaa9edf63aca0784cb30b79b5e"
+
 bson@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/bson/-/bson-1.0.4.tgz#93c10d39eaa5b58415cbc4052f3e53e562b0b72c"
@@ -924,6 +928,10 @@ vary@~1.1.1:
 void-elements@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
+
+web3@^1.0.0-beta.18:
+  version "1.0.0-beta2"
+  resolved "https://registry.yarnpkg.com/web3/-/web3-1.0.0-beta2.tgz#bde93e2b88c431673f25d81298221a1ec2b1a9ef"
 
 with@~4.0.0:
   version "4.0.3"

@@ -1,5 +1,5 @@
 var geolib = require("geolib");
-var repo = require("./MongoDbRepository");
+var repo = require("./MockDataRepository");
 var mongoose = require('mongoose');
 
 function getUserFromContext(req) {
@@ -10,7 +10,7 @@ function getUserFromContext(req) {
 };
 
 function mapWithDistance(to, from) {
-  const distance = geolib.getDistance(to, from);
+  const distance = geolib.getDistance(to.location, from);
   return Object.assign({}, {
     distance: distance
   }, to);
@@ -52,12 +52,13 @@ exports.create = function(req, res, next) {
   // todo: validation
   // todo: probably more complex when adding to a block chain
   const newListing = req.body;
-  const listingUser = getUserFromContext(req);
-  console.log("create:", newListing, listingUser);
-  const listingRequest = {
-    listing:newListing,
-    user:listingUser
-  };
+  // const listingUser = getUserFromContext(req);
+  // console.log("create:", newListing, listingUser);
+  // const listingRequest = {
+  //   listing:newListing,
+  //   user:listingUser
+  // };
+  const listingRequest = newListing;
   const results = repo.addNew(listingRequest);
   results.then((data)=> {
     res.status(201).json(data);
