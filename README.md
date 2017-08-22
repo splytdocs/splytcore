@@ -1,5 +1,38 @@
 ## Splyt related ReadMe.
 
+Downloading geth client:
+
+- Download ethereum client (geth) fromhere.
+-  Extract it to a desired location.
+-  Open terminal and cd to the folder where geth is.
+
+Creating a wallet:
+
+-  Then type ./geth --testnet account new in the terminal to create a new testnet wallet.
+-  Geth client will prompt you to enter password twice to create a wallet.
+-  We'll use Ropsten  which is a private --testnet for testing purposes. (Omit the --testnet flag to sync official chain)
+
+Downloading private testnet:
+
+-  Type in terminal ./geth --testnet --verbosity 1 console . This will sync the Ropsten testnet to your computer.
+-  Current block # for Ropsten is # 1,531,208 at the time of writing. So sit back and wait until your node downloads all the      blocks up till the current block.
+-  You can check the sync status buy typing in geth console web3.eth.syncing  which will display block information.
+-  Get your wallet address by typing web3.eth.accounts[0] We'll get some fake ether from here. You'll need to give them your  wallet address.
+-  Get solidity compiler using sudo npm install -g solc (Installing npm is outside of this tutorial's scope).
+-  CD to the compiler installation directory. Usually its in ~/.npm-packages/lib/node_modules/solc
+-   Lets compile our contract by typing:  ./solcjs --abi --bin -o Full-path-to-output-folder Full-path-to-input-contract-file
+- This will generate a folder in the Full-path-to-output-folder that contains binary conversion and ABI of the contract. Binary file is what we insert to blockchain. ABI (Application Binary Interface) is what we use to access the contract on blockchain.
+- Rename the files Contractname.bin & Contractname.abi respectively.
+- By now you should have fake ether sent to your wallet. Check it by sending this command in geth terminal. web3.eth.getBalance(web3.eth.accounts[0]) . If it says zero. Then you haven't recieved ether. try step 10 again.
+
+Deploying contract to blockchain:
+
+- Edit contract.bin and contract.abi such that the whole content of each file is set as a string. For example: var contractBin = 'all-of-your-code' are in quotation marks and assigned to a variable.
+- Then in your geth terminal load the 2 files into geth console by typing loadScript("full-path-to-bin-file.bin") and same with .abi file.
+- At this point you should just be able to type contractBin & contractAbi and be able to see contents in geth console.
+- Set a wallet variable that's {from: web3.eth.accounts[0], gas: 200000 }
+- If your contract has constructors. Then you'll need to define them
+
 
 
 
