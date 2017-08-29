@@ -1,0 +1,234 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Splyt Listing Workflow",
+		"_postman_id": "921264d2-ab5f-2ff8-4eaa-6c4da63bc13c",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Listing: Create one (201)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 201\"] = responseCode.code === 201;",
+							"var jsonData = JSON.parse(responseBody);",
+							"var id = jsonData.id;",
+							"tests[\"id looks valid: \" + id] = id && id.length == 24;",
+							"tests[\"isActive === true\"] = jsonData.isActive === true;",
+							"tests[\"__v is undefined\"] = jsonData.__v === undefined;",
+							"tests[\"_id is undefined\"] = jsonData._id === undefined;",
+							"tests[\"contributionTotal === 0\"] = jsonData.contributionTotal === 0;",
+							"var userId = jsonData.listedByUserId;",
+							"tests[\"listedByUserId looks valid: \" + userId] = userId && userId.length == 24;",
+							"tests[\"location.latitude == 40.6280245\"] = jsonData.location.latitude == 40.6280245;",
+							"tests[\"location.longitude == 117.2536039\"] = jsonData.location.longitude == 117.2536039;",
+							"var listedDate = new Date(jsonData.dateListed);",
+							"var now = new Date();",
+							"tests[\"dateListed looks valid\"] = (",
+							"    listedDate.getFullYear() == now.getFullYear()",
+							"    && listedDate.getMonth() == now.getMonth()",
+							"    && listedDate.getDay()   == now.getDay()",
+							");",
+							"if(id) {",
+							"  postman.setEnvironmentVariable(\"splyt.listing-workflow.last-listing-id\", id);",
+							"}",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location\": {\n    \"latitude\": 40.6280245,\n    \"longitude\": 117.2536039\n  },\n  \"asset\": {\n    \"term\": 317,\n    \"termType\": \"WEEKLY\",\n    \"totalPrice\": 97706,\n    \"title\": \"Sed accumsan felis. Ut at dolor quis odio consequat varius. Integer ac leo. Pellentesque ultrices mattis odio.\"\n  }\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: Get just created (200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"var expectedListingId = postman.getEnvironmentVariable(\"splyt.listing-workflow.last-listing-id\");",
+							"tests[\"id matches \" + expectedListingId] = jsonData.id == expectedListingId;",
+							"",
+							"var id = jsonData.id;",
+							"tests[\"id looks valid: \" + id] = id && id.length == 24;",
+							"tests[\"isActive === true\"] = jsonData.isActive === true;",
+							"tests[\"__v is undefined\"] = jsonData.__v === undefined;",
+							"tests[\"_id is undefined\"] = jsonData._id === undefined;",
+							"tests[\"contributionTotal === 0\"] = jsonData.contributionTotal === 0;",
+							"var userId = jsonData.listedByUserId;",
+							"tests[\"listedByUserId looks valid: \" + userId] = userId && userId.length == 24;",
+							"tests[\"location.latitude == 40.6280245\"] = jsonData.location.latitude == 40.6280245;",
+							"tests[\"location.longitude == 117.2536039\"] = jsonData.location.longitude == 117.2536039;",
+							"var listedDate = new Date(jsonData.dateListed);",
+							"var now = new Date();",
+							"tests[\"dateListed looks valid\"] = (",
+							"    listedDate.getFullYear() == now.getFullYear()",
+							"    && listedDate.getMonth() == now.getMonth()",
+							"    && listedDate.getDay()   == now.getDay()",
+							");",
+							"if(id) {",
+							"  postman.setEnvironmentVariable(\"splyt.listing-workflow.last-listing-id\", id);",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/{{splyt.listing-workflow.last-listing-id}}",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: w/bad format ID (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 404\"] = responseCode.code === 404;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/123xyz",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: Get w/oid, not found (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 404\"] = responseCode.code === 404;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/11111117d53350a19e5fee5b",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: Search, no params (200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"var jsonData = JSON.parse(responseBody);",
+							"var searchResults = jsonData;",
+							"tests[\"searchResults is truthy\"] = searchResults;",
+							"tests[\"searchResults[0].distance is truthy\"] = searchResults[0].distance;",
+							"",
+							"var expectedListingId = postman.getEnvironmentVariable(\"splyt.listing-workflow.last-listing-id\");",
+							"var lastCreated = searchResults.find((i)=>i.id == expectedListingId);",
+							"tests[\"last-listing-id was found: \" + expectedListingId] = lastCreated;",
+							"tests[\"last-listing distance is truthy\"] = lastCreated.distance;",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/search",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Deactivate just-created (200, isActive==false)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"isActive === false\"] = jsonData.isActive === false;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/{{splyt.listing-workflow.last-listing-id}}",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Listing, bad format ID (404)",
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/xyz",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Listing, right format ID, doesn't exist (404) copy",
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/11111117d53350a19e5fee5b",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
