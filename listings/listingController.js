@@ -4,15 +4,27 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var ListingResponse = require("./listingResponse")
 
+var Asset = require("./../models/Asset");
+
 function getUserFromContext(req) {
   return {
     id:mongoose.Types.ObjectId('56cb91bdc3464f14678934ca'),
     name:"Fakerton McNotreal"
   }; // Just use a fake person until we get auth* worked out
 };
-function toListingResponse(fromDb) {
+function toListingResponse(fromDb, createdAsset) {
   const doc = fromDb._doc;
   const made = ListingResponse.convertFromDbDocument(doc);
+  if(createdAsset) {
+    // todo: refactor this hard
+    const adoc = createdAsset._doc;
+    made.asset = adoc;
+    made.asset.id = adoc._id;
+    delete made.asset.__v;
+    delete made.asset._id;
+    delete made.asset.createdAt;
+    delete made.asset.updatedAt;
+  }
   return made;
 }
 
@@ -93,6 +105,20 @@ exports.getById = function(req, res, next) {
     handleCommonListingError(res, id, data);
   });
 };
+
+function persistAsset(listingRequest) {
+  return new Promise((resolve, reject)=>{
+    const document = Object.assign({}, listingRequest.asset);
+    Asset.create(document, (error, object)=>{
+      if(error) { 
+        reject({error: error}); 
+      }
+      else {
+        resolve({data:object})
+      }
+    });
+  });
+}
 exports.create = function(req, res, next) {
   
   // todo: validation
@@ -101,27 +127,45 @@ exports.create = function(req, res, next) {
   const listingUser = getUserFromContext(req);
   listingRequest = {
     listing:Object.assign({}, newListing),
-    user:listingUser
+    user:listingUser,
+    asset: Object.assign({}, newListing.asset)
   };
   listingRequest.listing.location = [
     newListing.location.latitude,
     newListing.location.longitude
   ];
   listingRequest.listing.title = newListing.asset.title;
-  listingRequest.listing.asset = null;
+
+  delete listingRequest.listing.asset;
   //listingRequest.listing.assetId = new ObjectId();
 
-  console.log("create:", JSON.stringify(listingRequest));
-  const results = repo.addNew(listingRequest);
-  results.then((data)=> {
-    if(!data.error && data.data) {
-      const output = toListingResponse(data.data);
-      res.status(201).json(output);
-    } else {
-      send500(res, data.error);
-    }
-  });
-  results.catch((data)=>send500(res, data.error));
+  function inlineAsset() {
+    const results = persistAsset(listingRequest);
+    results.then((data)=> {
+      if(!data.error && data.data) {
+        listingRequest.assetId = data.data._id;
+        inlineListing(data.data);
+      } else {
+        send500(res, data.error);
+      }
+    });
+    results.catch((data)=>send500(res, data.error));
+  }
+  
+  function inlineListing(createdAsset) {
+    const results = repo.addNew(listingRequest);
+    results.then((data)=> {
+      if(!data.error && data.data) {
+        const output = toListingResponse(data.data, createdAsset);
+        res.status(201).json(output);
+      } else {
+        send500(res, data.error);
+      }
+    });
+    results.catch((data)=>send500(res, data.error));
+  }
+
+  inlineAsset();
 };
 exports.delete = function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
