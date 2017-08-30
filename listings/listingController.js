@@ -123,11 +123,7 @@ function sendValidationError(res, summary) {
   res.status(400).json(summary.envelope);
 }
 exports.create = function(req, res, next) {
-  const clr = require("./CreateListingRequest");
-  const validationSummary = clr.validateSchemaForApi(req.body);
-  if(!validationSummary.didPass) {
-    
-  }
+  
   // todo: validation
   
   const newListing = req.body;
