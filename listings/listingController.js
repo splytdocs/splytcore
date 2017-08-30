@@ -1,6 +1,8 @@
 var geolib = require("geolib");
-var repo = require("./MockDataRepository");
+var repo = require("./contextualListingRepoService").choose();
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.Types.ObjectId;
+var ListingResponse = require("./listingResponse")
 
 function getUserFromContext(req) {
   return {
@@ -8,62 +10,118 @@ function getUserFromContext(req) {
     name:"Fakerton McNotreal"
   }; // Just use a fake person until we get auth* worked out
 };
+function toListingResponse(fromDb) {
+  const doc = fromDb._doc;
+  const made = ListingResponse.convertFromDbDocument(doc);
+  return made;
+}
+
+function send500(res, error) {
+  // todo: Make this detect if the person can see 
+  // full errors (dev/debug only)
+  const sendFullError = true;
+  const toSend = sendFullError ? error : { message: "We encountered an unexpected error, sorry." };
+  res.status(500).json(toSend);
+}
+function send404ListingNotFound(res, id) {
+  res.status(404).send(`Listing '${id}' not found.`);
+}
+function send200(res, output) {
+  res.status(200).json(output);
+}
 
 function mapWithDistance(to, from) {
   const distance = geolib.getDistance(to.location, from);
-  return Object.assign({}, {
+  return Object.assign({}, to, {
     distance: distance
-  }, to);
+  });
 }
 //get /listings/search?location&sort&order&limit
 exports.search = function(req, res, next) {
-  const from = {
+  let from = {
     latitude:33.690055033,
     longitude:-117.8346320117
   }; // todo: hardcoded for now, derive this from IP or have client pass in location or something
-  
+  if(req.params.latitude && req.params.longitude) {
+    from = {
+      latitude:  req.params.latitude,
+      longitude: req.params.longitude
+    }
+  }
   const results = repo.search({
-    location:req.params.location,
+    location:from
   });
-  results.then((data)=> {
-    const output = data
-      .map((i)=>mapWithDistance(i, from))
-      .sort((a, b)=>a.distance-b.distance);
-    res.status(200).json(output);
+  results.then((envelope)=> {
+    if(!envelope.error) {
+      const searchResults = envelope.data;
+      const output = searchResults
+        .map((i)=>{
+          const y = toListingResponse(i);
+          const z = mapWithDistance(y, from);
+          return z;
+        })
+        .sort((a, b)=>a.distance-b.distance);
+      send200(res, output);
+    } else {
+      send500(res, envelope.error)
+    }
   });
-  results.catch((error)=>res.status(500));
+  results.catch((envelope)=>send500(res, envelope.error));
 };
+function handleCommonListingError(res, id, envelope) {
+    const error = envelope.error;
+    if(error.name == "CastError") {
+      send404ListingNotFound(res, id);
+    } else {
+      send500(res, error);
+    }
 
+}
 exports.getById = function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
   const id = req.params.id;
   const results = repo.findById(id);
   results.then((data)=> {
-    if(data) {
-      res.status(200).json(data);
+    if(!data.error && data.data) {
+      const output = toListingResponse(data.data);
+      send200(res, output);
     } else {
-      res.status(404).send(`Listing '${id}' not found.`)
+      send404ListingNotFound(res, id);
     }
   });
-  results.catch((error)=>res.status(500).json(error));
+  results.catch((data)=>{
+    handleCommonListingError(res, id, data);
+  });
 };
 exports.create = function(req, res, next) {
   
   // todo: validation
   // todo: probably more complex when adding to a block chain
   const newListing = req.body;
-  // const listingUser = getUserFromContext(req);
-  // console.log("create:", newListing, listingUser);
-  // const listingRequest = {
-  //   listing:newListing,
-  //   user:listingUser
-  // };
-  const listingRequest = newListing;
+  const listingUser = getUserFromContext(req);
+  listingRequest = {
+    listing:Object.assign({}, newListing),
+    user:listingUser
+  };
+  listingRequest.listing.location = [
+    newListing.location.latitude,
+    newListing.location.longitude
+  ];
+  listingRequest.listing.title = newListing.asset.title;
+  listingRequest.listing.asset = null;
+  //listingRequest.listing.assetId = new ObjectId();
+
+  console.log("create:", JSON.stringify(listingRequest));
   const results = repo.addNew(listingRequest);
   results.then((data)=> {
-    res.status(201).json(data);
+    if(!data.error && data.data) {
+      const output = toListingResponse(data.data);
+      res.status(201).json(output);
+    } else {
+      send500(res, data.error);
+    }
   });
-  results.catch((error)=>res.status(500).json(error));
+  results.catch((data)=>send500(res, data.error));
 };
 exports.delete = function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
@@ -72,12 +130,29 @@ exports.delete = function(req, res, next) {
   // todo: Ensure that user deleting this actually owns the listing
   const id = req.params.id;
   const results = repo.deactivate(id);
-  results.then((data)=> {
-    if(data) {
-      res.status(200).json(data);
+  results.then((envelope)=> {
+    if(!envelope.error && envelope.data) {
+      const output = toListingResponse(envelope.data);
+      send200(res, output);
     } else {
-      res.status(404).send(`Listing '${id}' not found.`)
+      send404ListingNotFound(res, id);
     }
   });
-  results.catch((error)=>res.status(500).json(error));
+  results.catch((data)=>{
+    handleCommonListingError(res, id, data);
+  });
 };
+// urgent:
+// - create asset in db with listing
+//   - add asset object to listing responses
+// - real validation on POST listing
+// - real search by distance
+// - add real parameters to search
+//    - location
+//    - limit
+//    - pagination
+// - timeouts to prevent infinite waits on unhandled cases
+// eventually:
+// - refactor & tests
+// - better orchestration and in-out adapters
+//    - better injection of repo

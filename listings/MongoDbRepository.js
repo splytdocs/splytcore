@@ -1,26 +1,47 @@
 var Listing = require("../models/Listing");
 var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
-
+var ObjectId = mongoose.Schema.Types.ObjectId;
 exports.search = function(query) {
   return new Promise((resolve, reject)=>{
-    resolve(all);
+    Listing.find({
+      isActive:true,
+    }).exec((error, found)=> {
+      if(error) { 
+        reject({error: error}); 
+      }
+      else {
+        resolve({data:found})
+      }
+    });
   });
 };
 exports.findById = function(id) {
   return new Promise((resolve, reject)=>{
-    const found = all.find(i=>i.id==id);
-    resolve(found);
+    Listing.findById(id, function whatever(error, found){
+      if(error) { 
+        reject({error: error}); 
+      }
+      else {
+        resolve({data:found})
+      }
+    });
   });
 };
 exports.deactivate = function(id) {
   return new Promise((resolve, reject)=>{
-    const found = all.find(i=>i.id==id);
-    if(found) {
-      found.isActive = false;
-    }
-    // todo: only works in memory for now
-    resolve(found);
+    const options = {new:true};
+    Listing.findByIdAndUpdate(id, 
+      { $set: { isActive:false }}, 
+      options, 
+      (error, found, zed)=>{
+        if(error) { 
+          reject({error: error}); 
+        }
+        else {
+          resolve({data:found})
+        }
+    });
   });
 };
 /*
@@ -40,24 +61,20 @@ exports.deactivate = function(id) {
   },
   */
 function convertListingRequestToDocument(listingRequest) {
-  return {
-    title: listingRequest.listing.title,
-    listedByUserId: listingRequest.user.id,
-    location: listingRequest.listing.location,
-    assetId: new mongoose.Schema.Types.ObjectId()
-  };
+  const doc = Object.assign({},listingRequest.listing);
+  doc.listedByUserId = listingRequest.user.id;
+  return doc;
 }
 exports.addNew = function(listingRequest) {
   return new Promise((resolve, reject)=>{
     const document = convertListingRequestToDocument(listingRequest);
-    const listingToSave = new Listing(document);
-    listingToSave.save(function onSaveCallback(error) {
+    Listing.create(document, (error, object)=>{
       if(error) { 
         reject({error: error}); 
       }
       else {
-        resolve({listing:listingToSave})
+        resolve({data:object})
       }
     });
   });
-}
+};
