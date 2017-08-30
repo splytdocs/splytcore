@@ -12,7 +12,6 @@ var schemaOptions = {
 };
 
 var assetSchema = new mongoose.Schema({
-  id: { type: ObjectId, default: new ObjectId(), required: true },
   // todo: revisit this, how should we store photos and their data? Probably just store a relative uri here
   photoUri: { type: String, required: false }, 
   // todo: What about physical assets like season tickets?
