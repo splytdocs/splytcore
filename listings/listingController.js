@@ -119,10 +119,17 @@ function persistAsset(listingRequest) {
     });
   });
 }
+function sendValidationError(res, summary) {
+  res.status(400).json(summary.envelope);
+}
 exports.create = function(req, res, next) {
-  
+  const clr = require("./CreateListingRequest");
+  const validationSummary = clr.validateSchemaForApi(req.body);
+  if(!validationSummary.didPass) {
+    
+  }
   // todo: validation
-  // todo: probably more complex when adding to a block chain
+  
   const newListing = req.body;
   const listingUser = getUserFromContext(req);
   listingRequest = {
