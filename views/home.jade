@@ -16,15 +16,9 @@ block content
           div= info.msg
 
     .row
-      .col-sm
-        h3 Heading
-        p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        a(href='#', role='button') View details
-      .col-sm
-        h3 Heading
-        p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        a(href='#', role='button') View details
-      .col-sm
-        h3 Heading
-        p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        a(href='#', role='button') View details
+      each listing in listings
+        .col-sm
+          h3= listing.title
+          p= listing.description
+          p= listing.price
+          a(href='#', role='button') View details

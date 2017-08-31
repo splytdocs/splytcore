@@ -1,8 +1,17 @@
+var mongoose = require('mongoose')
+var Listing = require("../models/Listing");
+
 /**
  * GET /
  */
 exports.index = function(req, res) {
-  res.render('home', {
-    title: 'Home'
-  });
+
+  Listing.find().exec( (err, result) => {
+    console.log(result)
+    console.log('hello')
+    res.render('home', {
+      title: 'Home',
+      listings: result
+    });
+  })
 };
