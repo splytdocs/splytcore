@@ -29,3 +29,5 @@ bower_components
 .DS_Store
 Thumbs.db
 mockDataUpdater.js
+
+wip.todo
