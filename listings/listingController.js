@@ -1,8 +1,10 @@
+var path = require('path')
 var geolib = require("geolib");
 var repo = require("./contextualListingRepoService").choose();
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var ListingResponse = require("./listingResponse")
+var ethereum = require(path.resolve("./controllers/ethereum"))
 
 var Asset = require("./../models/Asset");
 
@@ -125,7 +127,7 @@ function sendValidationError(res, summary) {
 exports.create = function(req, res, next) {
   
   // todo: validation
-  
+  // todo: send transaction to blockchain
   const newListing = req.body;
   const listingUser = getUserFromContext(req);
   listingRequest = {
