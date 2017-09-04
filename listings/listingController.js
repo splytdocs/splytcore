@@ -122,17 +122,22 @@ function persistAsset(listingRequest) {
   });
 }
 function sendValidationError(res, summary) {
-  res.status(400).json(summary.envelope);
+  res.status(400).json({errors: summary });
 }
 exports.create = function(req, res, next) {
-  
-  // todo: validation
-  // todo: send transaction to blockchain
+  const clr = require("./create/AjvCreateListingSchemaValidator");
+  const validator = new clr.AjvCreateListingSchemaValidator();
   const newListing = req.body;
+  const validationSummary = validator.validate(newListing);
+  if(validationSummary.length) {
+    sendValidationError(res, validationSummary);
+    return;
+  }
+
   const listingUser = getUserFromContext(req);
   listingRequest = {
     listing:Object.assign({}, newListing),
-    user:listingUser,
+    user:Object.assign({}, listingUser),
     asset: Object.assign({}, newListing.asset)
   };
   listingRequest.listing.location = [
@@ -192,8 +197,6 @@ exports.delete = function(req, res, next) {
   });
 };
 // urgent:
-// - create asset in db with listing
-//   - add asset object to listing responses
 // - real validation on POST listing
 // - real search by distance
 // - add real parameters to search

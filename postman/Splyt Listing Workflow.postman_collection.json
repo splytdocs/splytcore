@@ -61,6 +61,65 @@
 			"response": []
 		},
 		{
+			"name": "Listing: Create one, bad schema (400)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 400\"] = responseCode.code === 400;",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"errors has three items\"] = jsonData.errors.length == 3;",
+							"",
+							"pm.test(\"errors matches expected json\", function () {",
+							"    var jsonData2 = pm.response.json();",
+							"    pm.expect(jsonData2).to.eql({",
+							"    \"errors\": [",
+							"        {",
+							"            \"code\": \"minimum\",",
+							"            \"param\": \".asset.term\",",
+							"            \"type\": \"invalid_request_error\",",
+							"            \"message\": \"should be >= 0\"",
+							"        },",
+							"        {",
+							"            \"code\": \"required\",",
+							"            \"param\": \".asset\",",
+							"            \"type\": \"invalid_request_error\",",
+							"            \"message\": \"should have required property 'title'\"",
+							"        },",
+							"        {",
+							"            \"code\": \"required\",",
+							"            \"param\": \"location\",",
+							"            \"type\": \"invalid_request_error\",",
+							"            \"message\": \"should have required property 'location'\"",
+							"        }",
+							"    ]",
+							"});",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"asset\": {\n    \"term\": -1,\n    \"termType\": \"WEEKLY\",\n    \"totalPrice\": 97706\n  }\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "Listing: Get just created (200)",
 			"event": [
 				{
