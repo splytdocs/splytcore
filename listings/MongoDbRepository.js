@@ -59,6 +59,11 @@ exports.findById = function(id) {
 };
 function findAndAmendAsset(listing) {
   return new Promise((resolve, reject)=>{
+    if(!listing) {
+      // Couldn't find the listing, don't bother looking for an asset
+      resolve(listing);
+      return;
+    }
     Asset.findById(listing.assetId).exec((error, asset)=>{
       if(error) reject(error);
       else {
