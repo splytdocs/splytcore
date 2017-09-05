@@ -23,15 +23,23 @@ function getUserFromContext(req) {
 function toListingResponse(fromDb, createdAsset) {
   const doc = fromDb._doc;
   const made = ListingResponse.convertFromDbDocument(doc);
+
+  function fixUpAsset(asset) {
+    // todo: refactor this a lot
+    asset.id = asset._id;
+    delete asset.__v;
+    delete asset._id;
+    delete asset.createdAt;
+    delete asset.updatedAt;
+  }
+  if(fromDb.asset) {
+    made.asset = fromDb.asset._doc;
+  }
   if(createdAsset) {
-    // todo: refactor this hard
-    const adoc = createdAsset._doc;
-    made.asset = adoc;
-    made.asset.id = adoc._id;
-    delete made.asset.__v;
-    delete made.asset._id;
-    delete made.asset.createdAt;
-    delete made.asset.updatedAt;
+    made.asset = createdAsset._doc;
+  } 
+  if(made.asset) {
+    fixUpAsset(made.asset);
   }
   return made;
 }
@@ -64,13 +72,15 @@ exports.search = function(req, res, next) {
   results.then((envelope)=> {
     if(!envelope.error) {
       const searchResults = envelope.data;
-      const output = searchResults
-        .map((i)=>{
-          const y = toListingResponse(i);
-          const z = mapWithDistance(y, from);
-          return z;
-        })
-        .sort((a, b)=>a.distance-b.distance);
+      const output = {
+        items:searchResults
+          .map((i)=>{
+            const y = toListingResponse(i);
+            const z = mapWithDistance(y, from);
+            return z;
+          })
+          .sort((a, b)=>a.distance-b.distance)
+        };
       send200(res, output);
     } else {
       send500(res, envelope.error)
@@ -85,7 +95,6 @@ function handleCommonListingError(res, id, envelope) {
     } else {
       send500(res, error);
     }
-
 }
 exports.getById = function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
@@ -188,15 +197,3 @@ exports.delete = function(req, res, next) {
     handleCommonListingError(res, id, data);
   });
 };
-// urgent:
-// - real validation on POST listing
-// - real search by distance
-// - add real parameters to search
-//    - location
-//    - limit
-//    - pagination
-// - timeouts to prevent infinite waits on unhandled cases
-// eventually:
-// - refactor & tests
-// - better orchestration and in-out adapters
-//    - better injection of repo

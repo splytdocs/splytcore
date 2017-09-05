@@ -30,6 +30,10 @@ module.exports.convertFromDbDocument = function(document) {
   delete result.__v;
   delete result.updatedAt;
   delete result.createdAt;
+  delete result.assetId;
+  if(result.distance === null) {
+    delete result.distance;
+  }
   if(document.location) {
     delete result.location;
     if(Array.isArray(document.location)) {
@@ -46,20 +50,3 @@ module.exports.convertFromDbDocument = function(document) {
   }
   return result;
 }
-/*
-
-var listingSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  listedByUserId: {type: ObjectId, required: true },
-  dateListed: { type: Date, default: Date.now, required: true },
-  isActive: { type: Boolean, default: true, required: true },
-  contributionTotal: { type: Number, min: 0, required: true, default:0 },
-   "Foreign key" to Asset 
-  //assetId: { type:ObjectId, required: false },
-  location: {
-    type: [Number],
-    index: '2d',
-    required: true
-  },
-}, schemaOptions);
-*/

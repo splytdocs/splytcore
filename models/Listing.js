@@ -18,12 +18,12 @@ var listingSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true, required: true },
   contributionTotal: { type: Number, min: 0, required: true, default:0 },
   /* "Foreign key" to Asset */
-  //assetId: { type:ObjectId, required: false },
+  assetId: { type:ObjectId, required: true },
   location: {
     type: [Number],
     index: '2d',
     required: true
-  },
+  }
 }, schemaOptions);
 
 var Listing = mongoose.model('Listing', listingSchema);

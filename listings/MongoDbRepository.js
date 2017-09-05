@@ -2,6 +2,7 @@ var Listing = require("../models/Listing");
 var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
+
 exports.search = function(query) {
   return new Promise((resolve, reject)=>{
     Listing.find({
@@ -11,23 +12,48 @@ exports.search = function(query) {
         reject({error: error}); 
       }
       else {
-        resolve({data:found})
+        const mapped = found.map((listing)=> {
+          const withAsset = findAndAmendAsset(listing);
+           /* ignore responses for now */
+          withAsset.then((d)=>{});
+          withAsset.catch((e)=>{});
+          return listing;
+        });
+        resolve({data:mapped});
       }
     });
   });
 };
 exports.findById = function(id) {
   return new Promise((resolve, reject)=>{
-    Listing.findById(id, function whatever(error, found){
+    Listing.findById(id)
+    .exec(function(error, found){
       if(error) { 
         reject({error: error}); 
       }
       else {
-        resolve({data:found})
+        const withAsset = findAndAmendAsset(found);
+        withAsset.then(()=>{
+          resolve({data:found});
+        });
+        withAsset.catch((e)=>{
+          reject({error:e});
+        });
       }
     });
   });
 };
+function findAndAmendAsset(listing) {
+  return new Promise((resolve, reject)=>{
+    Asset.findById(listing.assetId).exec((error, asset)=>{
+      if(error) reject(error);
+      else {
+        listing.asset = asset;
+        resolve(listing);
+      }
+    });
+  });
+}
 exports.deactivate = function(id) {
   return new Promise((resolve, reject)=>{
     const options = {new:true};
@@ -39,7 +65,13 @@ exports.deactivate = function(id) {
           reject({error: error}); 
         }
         else {
-          resolve({data:found})
+          const withAsset = findAndAmendAsset(found);
+          withAsset.then(()=>{
+            resolve({data:found});
+          });
+          withAsset.catch((e)=>{
+            reject({error:e});
+          });
         }
     });
   });
@@ -63,6 +95,7 @@ exports.deactivate = function(id) {
 function convertListingRequestToDocument(listingRequest) {
   const doc = Object.assign({},listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;
+  doc.assetId = listingRequest.assetId;
   return doc;
 }
 exports.addNew = function(listingRequest) {

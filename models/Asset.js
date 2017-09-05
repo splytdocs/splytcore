@@ -33,7 +33,8 @@ var assetSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     required: true
-  }
+  },
+  title: { type: String, required: true },
 }, schemaOptions);
 
 var Asset = mongoose.model('Asset', assetSchema);
