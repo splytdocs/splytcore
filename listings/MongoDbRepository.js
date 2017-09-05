@@ -7,19 +7,33 @@ exports.search = function(query) {
   return new Promise((resolve, reject)=>{
     Listing.find({
       isActive:true,
-    }).exec((error, found)=> {
+    })
+    .limit(1)
+    .exec((error, found)=> {
+      const waitingFor = [];
       if(error) { 
         reject({error: error}); 
       }
       else {
         const mapped = found.map((listing)=> {
+          const assetId1 = listing.assetId;
+          const assetId2 = listing._doc.assetId;
           const withAsset = findAndAmendAsset(listing);
            /* ignore responses for now */
           withAsset.then((d)=>{});
-          withAsset.catch((e)=>{});
+          withAsset.catch((e)=>{
+            console.log(".search:error amending asset to listing", arguments, listing);
+          });
+          waitingFor.push(withAsset);
           return listing;
         });
-        resolve({data:mapped});
+        const all = Promise.all(waitingFor);
+        all.then(()=>{
+          resolve({data:mapped});
+        });
+        all.catch(()=>{
+          resolve({data:mapped});
+        });
       }
     });
   });
@@ -53,7 +67,7 @@ function findAndAmendAsset(listing) {
       }
     });
   });
-}
+};
 exports.deactivate = function(id) {
   return new Promise((resolve, reject)=>{
     const options = {new:true};
@@ -76,22 +90,6 @@ exports.deactivate = function(id) {
     });
   });
 };
-/*
-
-  id: { type: Schema.Types.ObjectId, default: new ObjectId(), required: true },
-  title: { type: String, required: true },
-  listedByUserId: {type: Schema.Types.ObjectId, required: true },
-  dateListed: { type: Date, default: Date.now, required: true },
-  isActive: { type: Boolean, default: true, required: true },
-  contributionTotal: { type: Number, min: 0, required: true },
-
-  assetId: {type: Schema.Types.ObjectId, required: true },
-  location: {
-    type: [Number],
-    index: '2d',
-    required: true
-  },
-  */
 function convertListingRequestToDocument(listingRequest) {
   const doc = Object.assign({},listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;

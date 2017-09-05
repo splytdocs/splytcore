@@ -21,6 +21,7 @@ function getUserFromContext(req) {
   }; // Just use a fake person until we get auth* worked out
 };
 function toListingResponse(fromDb, createdAsset) {
+  if(!fromDb) return null;
   const doc = fromDb._doc;
   const made = ListingResponse.convertFromDbDocument(doc);
 
