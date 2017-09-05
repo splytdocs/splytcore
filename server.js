@@ -10,6 +10,7 @@ var expressValidator = require('express-validator');
 var dotenv = require('dotenv');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var timeout = require('connect-timeout')
 
 // Load environment variables from .env file
 dotenv.load();
@@ -76,10 +77,22 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedi
 
 //todo: improve this
 var listings = require('./listings/listingController');
-app.post('/api/listings/',      listings.create);
-app.get('/api/listings/search', listings.search);
-app.get('/api/listings/:id',    listings.getById);
-app.delete('/api/listings/:id', listings.delete);
+var standardTimeout = function() { return timeout('10s'); }
+function haltOnTimedout (req, res, next) {
+  if (!req.timedout) next()
+}
+app.post('/api/listings/', 
+  standardTimeout(), haltOnTimedout,
+  listings.create);
+app.get('/api/listings/search', 
+  standardTimeout(), haltOnTimedout, 
+  listings.search);
+app.get('/api/listings/:id', 
+  standardTimeout(), haltOnTimedout, 
+  listings.getById);
+app.delete('/api/listings/:id', 
+  standardTimeout(), haltOnTimedout, 
+  listings.delete);
 
 // Production error handler
 if (app.get('env') === 'production') {
