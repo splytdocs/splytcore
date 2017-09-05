@@ -1,10 +1,16 @@
-var path = require('path')
-var geolib = require("geolib");
-var repo = require("./contextualListingRepoService").choose();
-var mongoose = require('mongoose');
-var ObjectId = mongoose.Schema.Types.ObjectId;
-var ListingResponse = require("./listingResponse")
-var ethereum = require(path.resolve("./controllers/ethereum"))
+const path = require('path');
+const geolib = require("geolib");
+const repo = require("./contextualListingRepoService").choose();
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+const ListingResponse = require("./listingResponse")
+const ethereum = require(path.resolve("./controllers/ethereum"));
+const helpers = require("./../app/ResponseHelpers");
+const clr = require("./create/AjvCreateListingSchemaValidator");
+const send500 = helpers.send500,
+      send200 = helpers.send200
+      send404Message = helpers.send404Message,
+      sendValidationError = helpers.sendValidationError;
 
 var Asset = require("./../models/Asset");
 
@@ -30,18 +36,8 @@ function toListingResponse(fromDb, createdAsset) {
   return made;
 }
 
-function send500(res, error) {
-  // todo: Make this detect if the person can see 
-  // full errors (dev/debug only)
-  const sendFullError = true;
-  const toSend = sendFullError ? error : { message: "We encountered an unexpected error, sorry." };
-  res.status(500).json(toSend);
-}
 function send404ListingNotFound(res, id) {
-  res.status(404).send(`Listing '${id}' not found.`);
-}
-function send200(res, output) {
-  res.status(200).json(output);
+  send404Message(res, `Listing '${id}' not found.`);
 }
 
 function mapWithDistance(to, from) {
@@ -121,11 +117,7 @@ function persistAsset(listingRequest) {
     });
   });
 }
-function sendValidationError(res, summary) {
-  res.status(400).json({errors: summary });
-}
 exports.create = function(req, res, next) {
-  const clr = require("./create/AjvCreateListingSchemaValidator");
   const validator = new clr.AjvCreateListingSchemaValidator();
   const newListing = req.body;
   const validationSummary = validator.validate(newListing);

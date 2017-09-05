@@ -2,6 +2,11 @@ var Web3 = require('web3')
 var path = require('path')
 var fs = require('fs')
 
+// This is currently erroring causing the app not to run
+// Remove these lines to reenable it
+console.error("Ethereum disabled temporarily, look at ethereum.js to re-enable.")
+return;
+
 
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider);
