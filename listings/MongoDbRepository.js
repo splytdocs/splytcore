@@ -8,7 +8,7 @@ exports.search = function(query) {
     Listing.find({
       isActive:true,
     })
-    .limit(1)
+    //.limit(1)
     .exec((error, found)=> {
       const waitingFor = [];
       if(error) { 
