@@ -55,6 +55,7 @@ function mapWithDistance(to, from) {
     distance: distance
   });
 }
+
 //get /listings/search?location&sort&order&limit
 exports.search = function(req, res, next) {
   let from = {
