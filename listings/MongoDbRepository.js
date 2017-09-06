@@ -3,13 +3,16 @@ var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-exports.search = function(query) {
+exports.search = function(criteria) {
   return new Promise((resolve, reject)=>{
-    Listing.find({
+    let query = Listing.find({
       isActive:true,
-    })
+    });
+    if(criteria.limit && criteria.limit > 0) {
+      query.limit(criteria.limit);
+    }
     //.limit(1)
-    .exec((error, found)=> {
+    query.exec((error, found)=> {
       const waitingFor = [];
       if(error) { 
         reject({error: error}); 
