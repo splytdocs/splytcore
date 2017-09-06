@@ -11,6 +11,7 @@ const send500 = helpers.send500,
       send200 = helpers.send200
       send404Message = helpers.send404Message,
       sendValidationError = helpers.sendValidationError;
+const ListingSearchParameters = require("./ListingSearchParameters");
 
 var Asset = require("./../models/Asset");
 
@@ -58,19 +59,12 @@ function mapWithDistance(to, from) {
 
 //get /listings/search?location&sort&order&limit
 exports.search = function(req, res, next) {
-  let from = {
-    latitude:33.690055033,
-    longitude:-117.8346320117
-  }; // todo: hardcoded for now, derive this from IP or have client pass in location or something
-  if(req.params.latitude && req.params.longitude) {
-    from = {
-      latitude:  req.params.latitude,
-      longitude: req.params.longitude
-    }
-  }
-  const results = repo.search({
-    location:from
-  });
+  req.assert('latitude', 'latitude cannot be blank').notEmpty();
+  req.assert('longitude', 'longitude cannot be blank').notEmpty();
+  const criteria = ListingSearchParameters.build(req.query);
+  const results = repo.search(criteria);
+  const from = {latitude:criteria.latitude, longitude:criteria.longitude};
+
   results.then((envelope)=> {
     if(!envelope.error) {
       const searchResults = envelope.data;
