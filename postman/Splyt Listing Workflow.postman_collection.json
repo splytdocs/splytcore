@@ -233,7 +233,7 @@
 			"response": []
 		},
 		{
-			"name": "Listing: Search, no params (200)",
+			"name": "Listing: Search, lat/lon only",
 			"event": [
 				{
 					"listen": "test",
@@ -258,7 +258,102 @@
 				}
 			],
 			"request": {
-				"url": "{{splyt-api-uri}}/api/listings/search",
+				"url": {
+					"raw": "{{splyt-api-uri}}/api/listings/search?latitude=34.1184&longitude=118.3004",
+					"host": [
+						"{{splyt-api-uri}}"
+					],
+					"path": [
+						"api",
+						"listings",
+						"search"
+					],
+					"query": [
+						{
+							"key": "latitude",
+							"value": "34.1184",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "longitude",
+							"value": "118.3004",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: Search, with params (200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"var jsonData = JSON.parse(responseBody);",
+							"var searchResults = jsonData;",
+							"tests[\"searchResults is truthy\"] = searchResults;",
+							"tests[\"searchResults.items is truthy\"] = searchResults.items;",
+							"tests[\"searchResults.items[0].distance is truthy\"] = searchResults.items[0].distance;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{splyt-api-uri}}/api/listings/search?latitude=34.1184&longitude=118.3004&limit=2000&offset=0&includeDeactivated=1",
+					"host": [
+						"{{splyt-api-uri}}"
+					],
+					"path": [
+						"api",
+						"listings",
+						"search"
+					],
+					"query": [
+						{
+							"key": "latitude",
+							"value": "34.1184",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "longitude",
+							"value": "118.3004",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "limit",
+							"value": "2000",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "includeDeactivated",
+							"value": "1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
 				"method": "GET",
 				"header": [],
 				"body": {},
