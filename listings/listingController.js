@@ -14,6 +14,7 @@ const send500 = helpers.send500,
 const ListingSearchParameters = require("./ListingSearchParameters");
 
 var Asset = require("./../models/Asset");
+let baseUri = null;
 
 function getUserFromContext(req) {
   return {
@@ -21,7 +22,7 @@ function getUserFromContext(req) {
     name:"Fakerton McNotreal"
   }; // Just use a fake person until we get auth* worked out
 };
-function toListingResponse(fromDb, createdAsset) {
+function toListingResponse(fromDb, createdAsset, req) {
   if(!fromDb) return null;
   const doc = fromDb._doc;
   const made = ListingResponse.convertFromDbDocument(doc);
@@ -43,6 +44,15 @@ function toListingResponse(fromDb, createdAsset) {
   if(made.asset) {
     fixUpAsset(made.asset);
   }
+  if(!baseUri && req) {
+    baseUri = req.protocol + '://' + req.get('host')
+  }
+  function amendHref(target) {
+    if(!target.href && baseUri) {
+      target.href = `${baseUri}/api/listings/${target.id}`;
+    }
+  }
+  amendHref(made);
   return made;
 }
 
@@ -71,7 +81,7 @@ exports.search = function(req, res, next) {
       const output = {
         items:searchResults
           .map((i)=>{
-            const y = toListingResponse(i);
+            const y = toListingResponse(i, null, req);
             const z = mapWithDistance(y, from);
             return z;
           })
@@ -98,7 +108,7 @@ exports.getById = function(req, res, next) {
   const results = repo.findById(id);
   results.then((data)=> {
     if(!data.error && data.data) {
-      const output = toListingResponse(data.data);
+      const output = toListingResponse(data.data, null, req);
       send200(res, output);
     } else {
       send404ListingNotFound(res, id);
@@ -163,7 +173,7 @@ exports.create = function(req, res, next) {
     const results = repo.addNew(listingRequest);
     results.then((data)=> {
       if(!data.error && data.data) {
-        const output = toListingResponse(data.data, createdAsset);
+        const output = toListingResponse(data.data, createdAsset, req);
         res.status(201).json(output);
       } else {
         send500(res, data.error);
@@ -183,7 +193,7 @@ exports.delete = function(req, res, next) {
   const results = repo.deactivate(id);
   results.then((envelope)=> {
     if(!envelope.error && envelope.data) {
-      const output = toListingResponse(envelope.data);
+      const output = toListingResponse(envelope.data, null, req);
       send200(res, output);
     } else {
       send404ListingNotFound(res, id);
