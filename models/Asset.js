@@ -35,6 +35,7 @@ var assetSchema = new mongoose.Schema({
     required: true
   },
   title: { type: String, required: true },
+  cargo: { type: Object, required: false }
 }, schemaOptions);
 
 var Asset = mongoose.model('Asset', assetSchema);

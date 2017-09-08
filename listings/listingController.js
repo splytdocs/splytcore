@@ -154,8 +154,7 @@ exports.create = function(req, res, next) {
   listingRequest.listing.title = newListing.asset.title;
 
   delete listingRequest.listing.asset;
-  //listingRequest.listing.assetId = new ObjectId();
-
+  
   function inlineAsset() {
     const results = persistAsset(listingRequest);
     results.then((data)=> {
