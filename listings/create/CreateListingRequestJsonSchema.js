@@ -38,7 +38,7 @@ class CreateListingRequestJsonSchema {
               "id": "/properties/asset/properties/cargo", 
               "title": "Specific information about this individual asset not able to be generalized.", 
               "type": "object"
-            }, 
+            },
           }, 
           "type": "object",
           "required":["term", "termType", "title","totalPrice","cargo"]

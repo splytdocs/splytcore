@@ -24,7 +24,8 @@ describe('AjvCreateListingSchemaValidator', () => {
           "term": 317,
           "termType": "WEEKLY",
           "totalPrice": 97706,
-          "title": "Sed accumsan felis."
+          "title": "Sed accumsan felis.",
+          "cargo":{}
         }
       }
     };
@@ -87,6 +88,18 @@ describe('AjvCreateListingSchemaValidator', () => {
         param:".location",
         type:"invalid_request_error",
         message:"should have required property 'longitude'"
+      });
+    });
+    it('should have one error requiring `asset.cargo` when undefined', () => {
+      const data = validSample();
+      delete data.asset.cargo;
+      const results = runValidationOn(data);
+      expect(results.length).toEqual(1);
+      expect(results[0]).toEqual({
+        code:"required",
+        param:".asset",
+        type:"invalid_request_error",
+        message:"should have required property 'cargo'"
       });
     });
   });
