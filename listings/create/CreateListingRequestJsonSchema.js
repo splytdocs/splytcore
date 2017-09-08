@@ -32,10 +32,16 @@ class CreateListingRequestJsonSchema {
               "title": "The desired price of this asset", 
               "type": "number",
               "minimum":0
-            }
+            },
+            "cargo": {
+              "description": "Specific information about this individual asset not able to be generalized. For instance, a vehicle would have a `cargo` object describing its Year, Make, Model, Trim, etc. Season Tickets may have something like Team, Box, etc.", 
+              "id": "/properties/asset/properties/cargo", 
+              "title": "Specific information about this individual asset not able to be generalized.", 
+              "type": "object"
+            }, 
           }, 
           "type": "object",
-          "required":["term", "termType", "title","totalPrice"]
+          "required":["term", "termType", "title","totalPrice","cargo"]
         }, 
         "location": {
           "id": "/properties/location", 
