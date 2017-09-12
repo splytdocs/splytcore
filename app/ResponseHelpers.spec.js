@@ -35,4 +35,44 @@ describe('sendValidationError', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({errors:summary});
   });
+  it('should call res.status(402).json({errors:input}) when given custom statusCode', () => {
+    const res = mockRes(), summary = [{message:"whatever"}];
+    helpers.sendValidationError(res, summary, 402);
+    expect(res.status).toHaveBeenCalledWith(402);
+    expect(res.json).toHaveBeenCalledWith({errors:summary});
+  });
+});
+describe('sendNotAuthenticated', () => {
+  it('should call res.status(401).json(defaults) by default', () => {
+    const res = mockRes();
+    helpers.sendNotAuthenticated(res);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({errors:[{
+      type:"authentication_error",
+      message:"401 Unauthorized"
+    }]});
+  });
+  it('should call res.status(401).json({errors:summary})', () => {
+    const res = mockRes(), summary = [{message:"Whatever"}];
+    helpers.sendNotAuthenticated(res, summary);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({errors:summary});
+  });
+});
+describe('sendUnauthorized', () => {
+  it('should call res.status(403).json(defaults) by default', () => {
+    const res = mockRes();
+    helpers.sendUnauthorized(res);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({errors:[{
+      type:"authentication_error",
+      message:"403 Unauthorized"
+    }]});
+  });
+  it('should call res.status(403).json({errors:summary})', () => {
+    const res = mockRes(), summary = [{message:"Whatever"}];
+    helpers.sendUnauthorized(res, summary);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({errors:summary});
+  });
 });

@@ -11,6 +11,23 @@ module.exports.send200 = function(res, output) {
 module.exports.send404Message = function(res, message) {
   res.status(404).send(message);
 }
-module.exports.sendValidationError = function(res, summary) {
-  res.status(400).json({ errors: summary });
-}
+module.exports.sendValidationError = function(res, summary, statusCode) {
+  statusCode = statusCode || 400;
+  res.status(statusCode).json({ errors: summary });
+};
+module.exports.sendNotAuthenticated = function(res, summary) {
+  const defaults = [{
+    message:"401 Unauthorized",
+    type:"authentication_error"
+  }];
+  if(summary == null) summary = defaults;
+  res.status(401).json({errors:summary});
+};
+module.exports.sendUnauthorized = function(res, summary) {
+  const defaults = [{
+    message:"403 Unauthorized",
+    type:"authentication_error"
+  }];
+  if(summary == null) summary = defaults;
+  res.status(403).json({errors:summary});
+};

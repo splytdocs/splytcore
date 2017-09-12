@@ -10,7 +10,7 @@ var expressValidator = require('express-validator');
 var dotenv = require('dotenv');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var timeout = require('connect-timeout')
+var timeout = require('connect-timeout');
 
 // Load environment variables from .env file
 dotenv.load();
@@ -44,36 +44,43 @@ app.use(expressValidator());
 app.use(methodOverride('_method'));
 app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(flash());
+
+
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
 app.use(function(req, res, next) {
   res.locals.user = req.user;
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
 
+function requireJwtAuthentication() {
+  return passport.authenticate("jwt", {session:false})
+}
+
 app.get('/', HomeCont.index);
-app.get('/contact', contactCont.contactGet);
-app.post('/contact', contactCont.contactPost);
-app.get('/account', userCont.ensureAuthenticated, userCont.accountGet);
-app.put('/account', userCont.ensureAuthenticated, userCont.accountPut);
-app.delete('/account', userCont.ensureAuthenticated, userCont.accountDelete);
-app.get('/signup', userCont.signupGet);
-app.post('/signup', userCont.signupPost);
-app.get('/login', userCont.loginGet);
-app.post('/login', userCont.loginPost);
-app.get('/forgot', userCont.forgotGet);
-app.post('/forgot', userCont.forgotPost);
-app.get('/reset/:token', userCont.resetGet);
-app.post('/reset/:token', userCont.resetPost);
-app.get('/logout', userCont.logout);
-app.get('/unlink/:provider', userCont.ensureAuthenticated, userCont.unlink);
-app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/login' }));
-app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
-app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
-app.get('/auth/twitter', passport.authenticate('twitter'));
-app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
+//app.get('/contact', contactCont.contactGet);
+//app.post('/contact', contactCont.contactPost);
+app.get('/api/accounts', requireJwtAuthentication(), userCont.accountGet);
+//app.put('/api/accounts', requireJwtAuthentication(), userCont.accountPut);
+//app.delete('/api/accounts', userCont.ensureAuthenticated, userCont.accountDelete);
+//app.get('/signup', userCont.signupGet);
+app.post('/api/accounts', userCont.signupPost);
+
+//app.get('/api/login', userCont.loginGet);
+app.post('/api/accounts/login', userCont.loginPost);
+//app.get('/forgot', userCont.forgotGet);
+//app.post('/forgot', userCont.forgotPost);
+//app.get('/reset/:token', userCont.resetGet);
+//app.post('/reset/:token', userCont.resetPost);
+//app.get('/logout', userCont.logout);
+//app.get('/unlink/:provider', userCont.ensureAuthenticated, userCont.unlink);
+//app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
+//app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/login' }));
+//app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
+//app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
+//app.get('/auth/twitter', passport.authenticate('twitter'));
+//app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
 
 //todo: improve this
 var listings = require('./listings/listingController');
@@ -82,6 +89,7 @@ function haltOnTimedout (req, res, next) {
   if (!req.timedout) next()
 }
 app.post('/api/listings/', 
+  requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
   listings.create);
 app.get('/api/listings/search', 
@@ -90,7 +98,8 @@ app.get('/api/listings/search',
 app.get('/api/listings/:id', 
   standardTimeout(), haltOnTimedout, 
   listings.getById);
-app.delete('/api/listings/:id', 
+app.delete('/api/listings/:id',
+  userCont.ensureAuthenticated, 
   standardTimeout(), haltOnTimedout, 
   listings.delete);
 

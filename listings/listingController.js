@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const ListingResponse = require("./listingResponse")
 const ethereum = require(path.resolve("./controllers/ethereum"));
-const helpers = require("./../app/ResponseHelpers");
 const clr = require("./create/AjvCreateListingSchemaValidator");
+const helpers = require("./../app/ResponseHelpers");
 const send500 = helpers.send500,
       send200 = helpers.send200
       send404Message = helpers.send404Message,
@@ -17,10 +17,12 @@ var Asset = require("./../models/Asset");
 let baseUri = null;
 
 function getUserFromContext(req) {
+  /* Be sure you're authenticated, otherwise this won't be here */
+  if(!req.user) throw 'req.user not found'
   return {
-    id:mongoose.Types.ObjectId('56cb91bdc3464f14678934ca'),
-    name:"Fakerton McNotreal"
-  }; // Just use a fake person until we get auth* worked out
+    id:req.user.id,
+    name:req.user.name
+  };
 };
 function toListingResponse(fromDb, createdAsset, req) {
   if(!fromDb) return null;

@@ -3,8 +3,9 @@ var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-
-
+var JwtStrategy = require('passport-jwt').Strategy,
+ExtractJwt = require('passport-jwt').ExtractJwt;
+var Jwt = require("./../app/Jwt");
 var User = require('../models/User');
 
 passport.serializeUser(function(user, done) {
@@ -184,4 +185,21 @@ passport.use(new TwitterStrategy({
       });
     });
   }
+}));
+
+const jwtOptions = Object.assign({}, Jwt.options, {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+});
+passport.use(new JwtStrategy(jwtOptions, function(jwt_payload, done) {
+  User.findById(jwt_payload.id, function(err, user) {
+      if (err) {
+          return done(err, false);
+      }
+      if (user) {
+          return done(null, user);
+      } else {
+          return done(null, false);
+          // or you could create a new account 
+      }
+  });
 }));

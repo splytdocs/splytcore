@@ -3,7 +3,14 @@ var crypto = require('crypto');
 var nodemailer = require('nodemailer');
 var passport = require('passport');
 var User = require('../models/User');
+const helpers = require("./../app/ResponseHelpers");
+const send500 = helpers.send500,
+      send200 = helpers.send200
+      send404Message = helpers.send404Message,
+      sendValidationError = helpers.sendValidationError,
+      sendNotAuthenticated = helpers.sendNotAuthenticated;
 
+var Jwt = require("./../app/Jwt");
 /**
  * Login required middleware
  */
@@ -11,7 +18,7 @@ exports.ensureAuthenticated = function(req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
-    res.redirect('/login');
+    return sendNotAuthenticated(res);
   }
 };
 
@@ -39,17 +46,25 @@ exports.loginPost = function(req, res, next) {
   var errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
-    return res.redirect('/login');
+    return sendValidationError(res, errors);
   }
 
   passport.authenticate('local', function(err, user, info) {
     if (!user) {
-      req.flash('error', info);
-      return res.redirect('/login')
+      return sendValidationError(res, err);
     }
     req.logIn(user, function(err) {
-      res.redirect('/');
+      if(err) {
+        return sendValidationError(res, err);
+      }
+      const thing = {
+        id:user.id,
+        name:user.name
+      };
+      const token = Jwt.sign(thing);
+      send200(res, {
+        token:token
+      });
     });
   })(req, res, next);
 };
@@ -63,19 +78,7 @@ exports.logout = function(req, res) {
 };
 
 /**
- * GET /signup
- */
-exports.signupGet = function(req, res) {
-  if (req.user) {
-    return res.redirect('/');
-  }
-  res.render('account/signup', {
-    title: 'Sign up'
-  });
-};
-
-/**
- * POST /signup
+ * POST /signup (POST /users)
  */
 exports.signupPost = function(req, res, next) {
   req.assert('name', 'Name cannot be blank').notEmpty();
@@ -88,13 +91,15 @@ exports.signupPost = function(req, res, next) {
 
   if (errors) {
     req.flash('error', errors);
-    return res.redirect('/signup');
+    return sendValidationError(res, errors);
   }
 
   User.findOne({ email: req.body.email }, function(err, user) {
     if (user) {
-      req.flash('error', { msg: 'The email address you have entered is already associated with another account.' });
-      return res.redirect('/signup');
+      const errors = [
+        { message: 'The email address you have entered is already associated with another account.' }
+      ]
+      return sendValidationError(res, errors);
     }
     user = new User({
       name: req.body.name,
@@ -102,22 +107,20 @@ exports.signupPost = function(req, res, next) {
       password: req.body.password
     });
     user.save(function(err) {
-      req.logIn(user, function(err) {
-        res.redirect('/');
-      });
+      send200(res, {
+        id:user._id
+      })
     });
   });
 };
-
-/**
- * GET /account
- */
-exports.accountGet = function(req, res) {
-  res.render('account/profile', {
-    title: 'My Account'
+exports.accountGet = function(req, res, next) {
+  User.findById(req.user.id, (err, user)=>{
+    if(err) {
+      return sendValidationError(res, [{message:"Something bad happened"}]);
+    }
+    return send200(res, user);
   });
-};
-
+}
 /**
  * PUT /account
  * Update profile information OR change password.
