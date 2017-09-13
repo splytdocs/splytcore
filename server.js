@@ -11,9 +11,23 @@ var dotenv = require('dotenv');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var timeout = require('connect-timeout');
+var Jwt = require("./app/Jwt");
+var helpers = require("./app/ResponseHelpers");
+var util = require("util");
 
 // Load environment variables from .env file
 dotenv.load();
+const env = dotenv.config();
+const postSocialUri = env.POST_SOCIAL_URI;
+const postSocialLogin = (token)=>{
+  // Should look something like this:
+  //http://localhost:3000/postsocial/?token=${token}
+  return util.format(postSocialUri, token);
+}
+const redirectPostSocial = (req, res)=>{
+  const output = Jwt.makeAndSignUserToken(req.user);
+  res.redirect(postSocialLogin(output.token));
+};
 
 // Controllers
 var HomeCont = require('./controllers/home');
@@ -75,8 +89,12 @@ app.post('/api/accounts/login', userCont.loginPost);
 //app.post('/reset/:token', userCont.resetPost);
 //app.get('/logout', userCont.logout);
 //app.get('/unlink/:provider', userCont.ensureAuthenticated, userCont.unlink);
-//app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'user_location'] }));
-//app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/login' }));
+app.get('/api/accounts/auth/facebook', passport.authenticate('facebook', 
+  { scope: ['email'] }));
+app.get('/api/accounts/auth/facebook/callback', 
+  passport.authenticate('facebook', {session:false}),
+  redirectPostSocial
+);
 //app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 //app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
 //app.get('/auth/twitter', passport.authenticate('twitter'));

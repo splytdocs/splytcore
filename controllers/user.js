@@ -57,14 +57,8 @@ exports.loginPost = function(req, res, next) {
       if(err) {
         return sendValidationError(res, err);
       }
-      const thing = {
-        id:user.id,
-        name:user.name
-      };
-      const token = Jwt.sign(thing);
-      send200(res, {
-        token:token
-      });
+      const output = Jwt.makeAndSignUserToken(user);
+      return send200(res, output);
     });
   })(req, res, next);
 };
