@@ -41,7 +41,7 @@ var app = express();
 
 
 mongoose.Promise = global.Promise;
-mongoose.set('debug', true)
+//mongoose.set('debug', true)
 mongoose.connect(process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
@@ -97,8 +97,10 @@ app.get('/api/accounts/auth/facebook/callback',
 );
 //app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 //app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
-//app.get('/auth/twitter', passport.authenticate('twitter'));
-//app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/login' }));
+app.get('/api/accounts/auth/twitter', passport.authenticate('twitter'));
+app.get('/api/accounts/auth/twitter/callback', 
+  passport.authenticate('twitter', { session:false }),
+  redirectPostSocial);
 
 //todo: improve this
 var listings = require('./listings/listingController');
