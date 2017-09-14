@@ -7,21 +7,21 @@ const jwtOptions = {
   audience: dotenv.JWT_AUDIENCE
 };
 function makeUnsignedUserPayload(user) {
-  const payload = {
+  return {
     id:user.id,
     name:user.name,
     sub:user.id
   };
-  return payload;
 };
-function makeAndSignUserToken(user) {
+function makeAndSignUserToken(user, options) {
   const toSign = makeUnsignedUserPayload(user);
-  return {token:sign(toSign)};
+  return {token:sign(toSign, options)};
 };
-function sign(toSign) {
-  return jwt.sign(toSign, jwtOptions.secretOrKey,{
-    audience:jwtOptions.audience,
-    issuer:jwtOptions.issuer
+function sign(toSign, options) {
+  options = options || jwtOptions;
+  return jwt.sign(toSign, options.secretOrKey, {
+    audience:options.audience,
+    issuer:options.issuer
   });
 };
 module.exports.options = jwtOptions;
