@@ -1,6 +1,6 @@
-var dotenv = require("dotenv");
+//var dotenv = require("dotenv");
 module.exports.choose = function(env) {
-  if(!env) env = dotenv.config();
+  if(!env) env = process.env;
   const repoName = env.LISTING_REPO || "MongoDbRepository";
   const map = {
     "MongoDbRepository":function() {

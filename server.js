@@ -11,14 +11,15 @@ var dotenv = require('dotenv');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var timeout = require('connect-timeout');
-var Jwt = require("./app/Jwt");
 var helpers = require("./app/ResponseHelpers");
 var util = require("util");
 
 // Load environment variables from .env file
 dotenv.load();
-const env = dotenv.config();
-const postSocialUri = env.POST_SOCIAL_URI;
+
+var Jwt = require("./app/Jwt");
+
+const postSocialUri = process.env.POST_SOCIAL_URI;
 const postSocialLogin = (token)=>{
   // Should look something like this:
   //http://localhost:3000/postsocial/?token=${token}
