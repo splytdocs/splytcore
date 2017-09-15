@@ -7,7 +7,7 @@ var session = require('express-session');
 var flash = require('express-flash');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
-var dotenv = require('dotenv');
+
 var mongoose = require('mongoose');
 var passport = require('passport');
 var timeout = require('connect-timeout');
@@ -15,7 +15,10 @@ var helpers = require("./app/ResponseHelpers");
 var util = require("util");
 
 // Load environment variables from .env file
-dotenv.load();
+if(process.env.NODE_ENV !== 'production') {
+  var dotenv = require('dotenv');
+  dotenv.load();
+}
 
 var Jwt = require("./app/Jwt");
 

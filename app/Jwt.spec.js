@@ -29,12 +29,12 @@ describe('sign', () => {
     expect(decoded.iss).toEqual(opts.issuer);
     expect(decoded.name).toEqual(user.name);
   });
-  it('should use dotenv.config() for jwt options when omitted', () => {
+  it('should use process.env for jwt options when omitted', () => {
     const user = {
       id:"12345",
       name:"Fakerton"
     };
-    const env = require("dotenv").config();
+    const env = process.env;
     const opts = {
       secretOrKey: env.JWT_SECRET,
       issuer: env.JWT_ISSUER,
