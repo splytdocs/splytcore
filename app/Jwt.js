@@ -1,10 +1,9 @@
-var dotenv = require("dotenv").config();
 var jwt = require("jsonwebtoken");
 
 const jwtOptions = {
-  secretOrKey: dotenv.JWT_SECRET,
-  issuer: dotenv.JWT_ISSUER,
-  audience: dotenv.JWT_AUDIENCE
+  secretOrKey: process.env.JWT_SECRET,
+  issuer: process.env.JWT_ISSUER,
+  audience: process.env.JWT_AUDIENCE
 };
 function makeUnsignedUserPayload(user) {
   return {

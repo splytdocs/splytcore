@@ -7,18 +7,22 @@ var session = require('express-session');
 var flash = require('express-flash');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
-var dotenv = require('dotenv');
+
 var mongoose = require('mongoose');
 var passport = require('passport');
 var timeout = require('connect-timeout');
-var Jwt = require("./app/Jwt");
 var helpers = require("./app/ResponseHelpers");
 var util = require("util");
 
 // Load environment variables from .env file
-dotenv.load();
-const env = dotenv.config();
-const postSocialUri = env.POST_SOCIAL_URI;
+if(process.env.NODE_ENV !== 'production') {
+  var dotenv = require('dotenv');
+  dotenv.load();
+}
+
+var Jwt = require("./app/Jwt");
+
+const postSocialUri = process.env.POST_SOCIAL_URI;
 const postSocialLogin = (token)=>{
   // Should look something like this:
   //http://localhost:3000/postsocial/?token=${token}
