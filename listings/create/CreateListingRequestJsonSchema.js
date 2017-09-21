@@ -46,9 +46,43 @@ class CreateListingRequestJsonSchema {
               "title": "Specific information about this individual asset not able to be generalized.", 
               "type": "object"
             },
+            "costBreakdown": {
+              "description": "A list of all the various costs associated with owning this asset.",
+              "id": "/properties/asset/properties/costBreakdown",
+              "title":"Cost Breakdown",
+              "type":"array",
+              "minItems":1,
+              "items":{
+                "type":"object",
+                "required":["id","amount"],
+                "properties":{
+                  "id": {
+                    "description": "The identifier of this type of cost.", 
+                    "id": "/properties/asset/properties/costBreakdown/item/id", 
+                    "title": "Cost ID", 
+                    "type": "string"
+                    // base, insurance, taxes, registration, fees, maintenance, cleaning, service, delivery
+                  },
+                  "amount":{
+                    "description": "The currency value for this cost.", 
+                    "id": "/properties/asset/properties/costBreakdown/item/amount", 
+                    "title": "Amount", 
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            },
+            "mode":{
+              "description": "Whether this asset is being bought or sold.", 
+              "id": "/properties/asset/properties/mode", 
+              "title": "Mode", 
+              "type": "string",
+              "enum": ["Buy", "Sell"]
+            },
           }, 
           "type": "object",
-          "required":["term", "termType", "title","totalPrice","cargo"]
+          "required":["term", "termType", "title","totalPrice","cargo", "costBreakdown", "mode"]
         }, 
         "location": {
           "id": "/properties/location", 

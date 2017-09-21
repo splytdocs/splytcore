@@ -29,7 +29,12 @@ describe('AjvCreateListingSchemaValidator', () => {
           "termType": "WEEKLY",
           "totalPrice": 97706,
           "title": "Sed accumsan felis.",
-          "cargo":{}
+          "mode":"Buy",
+          "cargo":{},
+          "costBreakdown":[{
+            "id":"base",
+            "amount":80000
+          }]
         }
       }
     };
@@ -154,6 +159,104 @@ describe('AjvCreateListingSchemaValidator', () => {
           type:"invalid_request_error",
           message:'should match format "date-time"'
         });
+      });
+    });
+    describe('asset fields', () => {
+      it('should have one error requiring `asset.costBreakdown` when undefined', () => {
+        const data = validSample();
+        delete data.asset.costBreakdown;
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"required",
+          param:".asset",
+          type:"invalid_request_error",
+          message:"should have required property 'costBreakdown'"
+        });
+      });
+      it('should have one error requiring `asset.costBreakdown` when empty', () => {
+        const data = validSample();
+        data.asset.costBreakdown = [];
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"minItems",
+          param:".asset.costBreakdown",
+          type:"invalid_request_error",
+          message:"should NOT have less than 1 items"
+        });
+      });
+      it('should have one error validating `asset.costBreakdown` when not an array', () => {
+        const data = validSample();
+        data.asset.costBreakdown = {};
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"type",
+          param:".asset.costBreakdown",
+          type:"invalid_request_error",
+          message:"should be array"
+        });
+      });
+      it('should have two errors validating `asset.costBreakdown` when item in array is not {id,amount}', () => {
+        const data = validSample();
+        data.asset.costBreakdown = [{x:"y",amount:"z"}]
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(2);
+        expect(results[0]).toEqual({
+          code:"required",
+          param:".asset.costBreakdown[0]",
+          type:"invalid_request_error",
+          message:"should have required property 'id'"
+        });
+        expect(results[1]).toEqual({
+          code:"type",
+          param:".asset.costBreakdown[0].amount",
+          type:"invalid_request_error",
+          message:"should be number"
+        });
+      });
+      it('should have one error requiring `asset.mode` when undefined', () => {
+        const data = validSample();
+        delete data.asset.mode;
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"required",
+          param:".asset",
+          type:"invalid_request_error",
+          message:"should have required property 'mode'"
+        });
+      });
+      it('should have two errors validating `asset.mode` when not a valid string', () => {
+        const data = validSample();
+        data.asset.mode = 8888;
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(2);
+        expect(results[0]).toEqual({
+          code:"type",
+          param:".asset.mode",
+          type:"invalid_request_error",
+          message:"should be string"
+        });
+        expect(results[1]).toEqual({
+          code:"enum",
+          param:".asset.mode",
+          type:"invalid_request_error",
+          message:"should be equal to one of the allowed values"
+        });
+      });
+      it('should have no errors validating `asset.mode` when mode is Buy', () => {
+        const data = validSample();
+        data.asset.mode = "Buy";
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(0);
+      });
+      it('should have no errors validating `asset.mode` when mode is Sell', () => {
+        const data = validSample();
+        data.asset.mode = "Sell";
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(0);
       });
     });
   });

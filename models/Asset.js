@@ -50,10 +50,7 @@ var assetSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  costBreakdown: {
-    type: Object,
-    required: false
-  },
+  costBreakdown: [costBreakdownSchema],
   photos: {
     type: Array,
     required: false
