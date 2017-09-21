@@ -46,10 +46,6 @@ var assetSchema = new mongoose.Schema({
     ],
     required: true
   },
-  totalPrice: {
-    type: Number,
-    required: true
-  },
   costBreakdown: [costBreakdownSchema],
   photos: {
     type: Array,

@@ -32,13 +32,6 @@ class CreateListingRequestJsonSchema {
               "id": "/properties/asset/properties/title", 
               "title": "A title describing this asset.", 
               "type": "string"
-            }, 
-            "totalPrice": {
-              "description": "The desired price of this asset.", 
-              "id": "/properties/asset/properties/totalPrice", 
-              "title": "The desired price of this asset", 
-              "type": "number",
-              "minimum":0
             },
             "cargo": {
               "description": "Specific information about this individual asset not able to be generalized. For instance, a vehicle would have a `cargo` object describing its Year, Make, Model, Trim, etc. Season Tickets may have something like Team, Box, etc.", 
@@ -82,7 +75,7 @@ class CreateListingRequestJsonSchema {
             },
           }, 
           "type": "object",
-          "required":["term", "termType", "title","totalPrice","cargo", "costBreakdown", "mode"]
+          "required":["term", "termType", "title","cargo", "costBreakdown", "mode"]
         }, 
         "location": {
           "id": "/properties/location", 

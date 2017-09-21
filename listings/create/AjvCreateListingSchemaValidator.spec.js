@@ -27,7 +27,6 @@ describe('AjvCreateListingSchemaValidator', () => {
         "asset": {
           "term": 317,
           "termType": "WEEKLY",
-          "totalPrice": 97706,
           "title": "Sed accumsan felis.",
           "mode":"Buy",
           "cargo":{},
@@ -71,18 +70,6 @@ describe('AjvCreateListingSchemaValidator', () => {
       expect(results[0]).toEqual({
         code:"minimum",
         param:".asset.term",
-        type:"invalid_request_error",
-        message:"should be >= 0"
-      });
-    });
-    it('should have one error for minimum on `totalPrice` when -1', () => {
-      const data = validSample();
-      data.asset.totalPrice = -1;
-      const results = runValidationOn(data);
-      expect(results.length).toEqual(1);
-      expect(results[0]).toEqual({
-        code:"minimum",
-        param:".asset.totalPrice",
         type:"invalid_request_error",
         message:"should be >= 0"
       });
