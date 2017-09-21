@@ -2,8 +2,15 @@ class CreateListingRequestJsonSchema {
   constructor() {
     this.schema = {
       "id": "CreateListingRequest", 
-      "required":["asset", "location"],
+      "required":["asset", "location","expirationDate"],
       "properties": {
+        "expirationDate": {
+          "description": "The date on which this listing should end if not funded.", 
+          "id": "/properties/asset/properties/expirationDate", 
+          "title": "Expiration Date", 
+          "type": "string",
+          "format":"date-time"
+        }, 
         "asset": {
           "id": "/properties/asset", 
           "properties": {
@@ -45,19 +52,37 @@ class CreateListingRequestJsonSchema {
         }, 
         "location": {
           "id": "/properties/location", 
-          "required":["latitude","longitude"],
+          "required":["latitude","longitude","city","state","zip"],
           "properties": {
             "latitude": {
-              "description": "The latitude of the listing's location.", 
+              "description": "The latitude of the listing's target location.", 
               "id": "/properties/location/properties/latitude", 
-              "title": "The latitude schema", 
+              "title": "Latitude", 
               "type": "number"
             }, 
             "longitude": {
-              "description": "The longitude of the listing's location.", 
+              "description": "The longitude of the listing's target location.", 
               "id": "/properties/location/properties/longitude", 
-              "title": "The longitude schema", 
+              "title": "Longitude", 
               "type": "number"
+            }, 
+            "city": {
+              "description": "The name of the city which this listing is targeting.", 
+              "id": "/properties/location/properties/city", 
+              "title": "City", 
+              "type": "string"
+            }, 
+            "state": {
+              "description": "The name of the state which this listing is targeting.", 
+              "id": "/properties/location/properties/state", 
+              "title": "State", 
+              "type": "string"
+            }, 
+            "zip": {
+              "description": "The name of the zip which this listing is targeting.", 
+              "id": "/properties/location/properties/zip", 
+              "title": "Zip", 
+              "type": "string"
             }
           }, 
           "type": "object"

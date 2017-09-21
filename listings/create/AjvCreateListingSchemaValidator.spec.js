@@ -16,9 +16,13 @@ describe('AjvCreateListingSchemaValidator', () => {
   describe('realistic', () => {
     function validSample() {
       return {
+        "expirationDate":"2017-09-21T04:08:11+00:00",
         "location": {
           "latitude": 40.6280245,
-          "longitude": 117.2536039
+          "longitude": 117.2536039,
+          "city":"Los Angeles",
+          "state":"California",
+          "zip":"90001"
         },
         "asset": {
           "term": 317,
@@ -32,16 +36,22 @@ describe('AjvCreateListingSchemaValidator', () => {
     function runValidationOn(data) {
       return new AjvCreateListingSchemaValidator().validate(data);
     }
-    it('should have a two of errors requiring `asset` and `location` when missing `asset` and `location`', () => {
+    it('should return three errors requiring `asset`,`location`,`expirationDate` when missing `asset` and `location` and `expirationDate`', () => {
       const results = runValidationOn({x:"y"});
-      //expect(results.length).toEqual(2);
+      
       expect(results[0]).toEqual({
+        code:"required",
+        param:"expirationDate",
+        type:"invalid_request_error",
+        message:"should have required property 'expirationDate'"
+      });
+      expect(results[1]).toEqual({
         code:"required",
         param:"asset",
         type:"invalid_request_error",
         message:"should have required property 'asset'"
       });
-      expect(results[1]).toEqual({
+      expect(results[2]).toEqual({
         code:"required",
         param:"location",
         type:"invalid_request_error",
@@ -72,11 +82,11 @@ describe('AjvCreateListingSchemaValidator', () => {
         message:"should be >= 0"
       });
     });
-    it('should have a two of errors requiring `.location.latitude` and `.location.longitude` when those are undefined', () => {
+    it('should have five errors requiring `.location.latitude`,`.location.longitude`,`.location.city`,`location.state`,`.location.zip` when those are undefined', () => {
       const data = validSample();
       data.location = {};
       const results = runValidationOn(data);
-      expect(results.length).toEqual(2);
+      expect(results.length).toEqual(5);
       expect(results[0]).toEqual({
         code:"required",
         param:".location",
@@ -89,6 +99,24 @@ describe('AjvCreateListingSchemaValidator', () => {
         type:"invalid_request_error",
         message:"should have required property 'longitude'"
       });
+      expect(results[2]).toEqual({
+        code:"required",
+        param:".location",
+        type:"invalid_request_error",
+        message:"should have required property 'city'"
+      });
+      expect(results[3]).toEqual({
+        code:"required",
+        param:".location",
+        type:"invalid_request_error",
+        message:"should have required property 'state'"
+      });
+      expect(results[4]).toEqual({
+        code:"required",
+        param:".location",
+        type:"invalid_request_error",
+        message:"should have required property 'zip'"
+      });
     });
     it('should have one error requiring `asset.cargo` when undefined', () => {
       const data = validSample();
@@ -100,6 +128,32 @@ describe('AjvCreateListingSchemaValidator', () => {
         param:".asset",
         type:"invalid_request_error",
         message:"should have required property 'cargo'"
+      });
+    });
+    describe('expirationDate', () => {
+      it('should return one error requiring `expirationDate` when undefined', () => {
+        const data = validSample();
+        delete data.expirationDate;
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"required",
+          param:"expirationDate",
+          type:"invalid_request_error",
+          message:"should have required property 'expirationDate'"
+        });
+      });
+      it('should return one error requiring `expirationDate` when not an RFC date-time', () => {
+        const data = validSample();
+        data.expirationDate = "2017-01-01";
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({
+          code:"format",
+          param:".expirationDate",
+          type:"invalid_request_error",
+          message:'should match format "date-time"'
+        });
       });
     });
   });
