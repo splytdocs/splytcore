@@ -34,19 +34,5 @@ module.exports.convertFromDbDocument = function(document) {
   if(result.distance === null) {
     delete result.distance;
   }
-  if(document.location) {
-    delete result.location;
-    if(Array.isArray(document.location)) {
-      result.location = {
-        latitude: document.location[0],
-        longitude:document.location[1],
-      }
-    } else {
-      result.location = {
-        latitude:  document.location.latitude,
-        longitude: document.location.longitude
-      }
-    }
-  }
   return result;
 }

@@ -1,11 +1,20 @@
+
+
 const CreateListingRequestJsonSchema = require("./CreateListingRequestJsonSchema").CreateListingRequestJsonSchema;
 describe('CreateListingRequestJsonSchema', () => {
   it('`schema` defaults to expected value', () => {
     const underTest = new CreateListingRequestJsonSchema();
     expect(underTest.schema).toEqual({
       "id": "CreateListingRequest", 
-      "required":["asset", "location"],
+      "required":["asset", "location","expirationDate"],
       "properties": {
+        "expirationDate": {
+          "description": "The date on which this listing should end if not funded.", 
+          "id": "/properties/asset/properties/expirationDate", 
+          "title": "Expiration Date", 
+          "type": "string",
+          "format":"date-time"
+        }, 
         "asset": {
           "id": "/properties/asset", 
           "properties": {
@@ -28,38 +37,83 @@ describe('CreateListingRequestJsonSchema', () => {
               "title": "A title describing this asset.", 
               "type": "string"
             }, 
-            "totalPrice": {
-              "description": "The desired price of this asset.", 
-              "id": "/properties/asset/properties/totalPrice", 
-              "title": "The desired price of this asset", 
-              "type": "number",
-              "minimum":0
-            },
             "cargo": {
               "description": "Specific information about this individual asset not able to be generalized. For instance, a vehicle would have a `cargo` object describing its Year, Make, Model, Trim, etc. Season Tickets may have something like Team, Box, etc.", 
               "id": "/properties/asset/properties/cargo", 
               "title": "Specific information about this individual asset not able to be generalized.", 
               "type": "object"
-            }
+            },
+            "costBreakdown": {
+              "description": "A list of all the various costs associated with owning this asset.",
+              "id": "/properties/asset/properties/costBreakdown",
+              "title":"Cost Breakdown",
+              "type":"array",
+              "minItems":1,
+              "items":{
+                "type":"object",
+                "required":["id","amount"],
+                "properties":{
+                  "id": {
+                    "description": "The identifier of this type of cost.", 
+                    "id": "/properties/asset/properties/costBreakdown/item/id", 
+                    "title": "Cost ID", 
+                    "type": "string"
+                    // base, insurance, taxes, registration, fees, maintenance, cleaning, service, delivery
+                  },
+                  "amount":{
+                    "description": "The currency value for this cost.", 
+                    "id": "/properties/asset/properties/costBreakdown/item/amount", 
+                    "title": "Amount", 
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            },
+            "mode":{
+              "description": "Whether this asset is being bought or sold.", 
+              "id": "/properties/asset/properties/mode", 
+              "title": "Mode", 
+              "type": "string",
+              "enum": ["Buy", "Sell"]
+            },
           }, 
           "type": "object",
-          "required":["term", "termType", "title","totalPrice","cargo"]
+          "required":["term", "termType", "title","cargo", "costBreakdown", "mode"]
         }, 
         "location": {
           "id": "/properties/location", 
-          "required":["latitude","longitude"],
+          "required":["latitude","longitude","city","state","zip"],
           "properties": {
             "latitude": {
-              "description": "The latitude of the listing's location.", 
+              "description": "The latitude of the listing's target location.", 
               "id": "/properties/location/properties/latitude", 
-              "title": "The latitude schema", 
+              "title": "Latitude", 
               "type": "number"
             }, 
             "longitude": {
-              "description": "The longitude of the listing's location.", 
+              "description": "The longitude of the listing's target location.", 
               "id": "/properties/location/properties/longitude", 
-              "title": "The longitude schema", 
+              "title": "Longitude", 
               "type": "number"
+            }, 
+            "city": {
+              "description": "The name of the city which this listing is targeting.", 
+              "id": "/properties/location/properties/city", 
+              "title": "City", 
+              "type": "string"
+            }, 
+            "state": {
+              "description": "The name of the state which this listing is targeting.", 
+              "id": "/properties/location/properties/state", 
+              "title": "State", 
+              "type": "string"
+            }, 
+            "zip": {
+              "description": "The name of the zip which this listing is targeting.", 
+              "id": "/properties/location/properties/zip", 
+              "title": "Zip", 
+              "type": "string"
             }
           }, 
           "type": "object"

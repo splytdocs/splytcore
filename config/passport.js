@@ -26,6 +26,10 @@ const jwtOptions = Object.assign({}, Jwt.options, {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
 });
 passport.use(new JwtStrategy(jwtOptions, function(jwt_payload, done) {
+  if(process.env.SPOOF_AUTH_AS) {
+    console.log(`spoofing auth as ${process.env.SPOOF_AUTH_AS}`);
+    jwt_payload.id = process.env.SPOOF_AUTH_AS;
+  }
   User.findById(jwt_payload.id, function(err, user) {
       if (err) {
           return done(err, false);

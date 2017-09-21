@@ -28,14 +28,21 @@ function toListingResponse(fromDb, createdAsset, req) {
   if(!fromDb) return null;
   const doc = fromDb._doc;
   const made = ListingResponse.convertFromDbDocument(doc);
-
+  function removeMongoFields(toAlter) {
+    if(!toAlter) return toAlter;
+    delete toAlter.__v;
+    delete toAlter._id;
+    delete toAlter.createdAt;
+    delete toAlter.updatedAt;
+    return toAlter;
+  }
   function fixUpAsset(asset) {
     // todo: refactor this a lot
     asset.id = asset._id;
-    delete asset.__v;
-    delete asset._id;
-    delete asset.createdAt;
-    delete asset.updatedAt;
+    removeMongoFields(asset);
+    if(asset.costBreakdown){
+      asset.costBreakdown.forEach(i=>removeMongoFields(i._doc));
+    }
   }
   if(fromDb.asset) {
     made.asset = fromDb.asset._doc;
@@ -45,6 +52,9 @@ function toListingResponse(fromDb, createdAsset, req) {
   } 
   if(made.asset) {
     fixUpAsset(made.asset);
+  }
+  if(made.location) {
+    removeMongoFields(made.location._doc);
   }
   if(!baseUri && req) {
     baseUri = req.protocol + '://' + req.get('host')
@@ -63,7 +73,8 @@ function send404ListingNotFound(res, id) {
 }
 
 function mapWithDistance(to, from) {
-  const distance = geolib.getDistance(to.location, from);
+  const actualTo = to.location._doc || to.location;
+  const distance = geolib.getDistance(actualTo, from);
   return Object.assign({}, to, {
     distance: distance
   });
@@ -149,10 +160,6 @@ exports.create = function(req, res, next) {
     user:Object.assign({}, listingUser),
     asset: Object.assign({}, newListing.asset)
   };
-  listingRequest.listing.location = [
-    newListing.location.latitude,
-    newListing.location.longitude
-  ];
   listingRequest.listing.title = newListing.asset.title;
 
   delete listingRequest.listing.asset;
