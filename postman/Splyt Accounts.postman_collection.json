@@ -1,0 +1,110 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Splyt Accounts",
+		"_postman_id": "c53fb6e8-64c2-13f3-e97f-03266166080b",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create account",
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\":\"{{splyt-full-name}}\",\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\",\n\t\"address\":\"{{splyt-address}}\",\n\t\"phone\":\"{{splyt-phone}}\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"pm.environment.set(\"splyt-bearer-token\", jsonData.token);",
+							"console.log(\"setting splyt-bearer-token!\")"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "View account info (not done, only for demonstration purposes now)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"pm.environment.set(\"splyt-bearer-token\", jsonData.token);",
+							"console.log(\"setting splyt-bearer-token!\")"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"fakertonmcnotreal@mailinator.com\",\n\t\"password\":\"--15=record=SERVICE=think=67--\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

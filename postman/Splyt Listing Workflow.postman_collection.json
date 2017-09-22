@@ -37,6 +37,10 @@
 							"if(id) {",
 							"  postman.setEnvironmentVariable(\"splyt.listing-workflow.last-listing-id\", id);",
 							"}",
+							"const baseUri = pm.variables.get(\"splyt-api-uri\");",
+							"const uri = `${baseUri}/api/listings/${id}`;",
+							"tests[\"href is correct\"] = jsonData.href == uri;",
+							"",
 							""
 						]
 					}
@@ -50,11 +54,16 @@
 						"key": "Content-Type",
 						"value": "application/json",
 						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"location\": {\n    \"latitude\": 40.6280245,\n    \"longitude\": 117.2536039\n  },\n  \"asset\": {\n    \"term\": 317,\n    \"termType\": \"WEEKLY\",\n    \"totalPrice\": 97706,\n    \"title\": \"Sed accumsan felis. Ut at dolor quis odio consequat varius. Integer ac leo. Pellentesque ultrices mattis odio.\"\n  }\n}"
+					"raw": "{\n  \"expirationDate\":\"2017-09-21T02:39:42+00:00\",\n  \"location\": {\n    \"latitude\": 33.0736,\n    \"longitude\": 118.4004,\n    \"city\":\"Beverly Hills\",\n    \"state\":\"CA\",\n    \"zip\":\"90210\"\n  },\n  \"asset\": {\n    \"title\": \"LTB a 2017 Maserati Ghibli SQ4!\",\n    \"costBreakdown\":[\n      {\"id\":\"base\",\"amount\":80000},\n      {\"id\":\"insurance\",\"amount\":4000},\n      {\"id\":\"taxes\",\"amount\":12000},\n      {\"id\":\"registration\",\"amount\":2000},\n      {\"id\":\"fees\",\"amount\":1000},\n      {\"id\":\"maintenance\",\"amount\":5000},\n      {\"id\":\"cleaning\",\"amount\":3000},\n      {\"id\":\"service\",\"amount\":25000},\n      {\"id\":\"delivery\",\"amount\":1000}\n    ],\n    \"mode\":\"Buy\",\n    \"term\": 317,\n    \"termType\": \"WEEKLY\",\n    \"cargo\": {\n      \"type\": \"vehicle\",\n      \"classification\":\"Auto\",\n      \"year\": 2017,\n      \"make\": {\n          \"name\": \"Maserati\",\n          \"id\": \"AAcEAA8NDwc\"\n      },\n      \"model\": {\n          \"name\": \"Ghibli\",\n          \"id\": \"DAMCDAQDCQs\"\n      },\n      \"trim\": {\n          \"name\": \"S Q4\",\n          \"id\": \"AgwDAg8AAgY\"\n      },\n      \"color\":{\n        \"name\":\"Red\",\n        \"id\": \"Ij2jmA9AAjL\"\n      },\n      \"mileage\":0,\n      \"vin\":\"\",\n      \"dealer\":\"\",\n      \"condition\":\"New\",\n      \"fuel\":\"Gas\",\n      \"transmission\":\"Continuously variable\",\n      \"features\":[\n        {\"name\":\"Isofix\", \"id\":\"isofix\"},\n        {\"name\":\"Climatronic\", \"id\":\"climatronic\"}\n      ]\n    }\n  }\n}"
 				},
 				"description": ""
 			},
@@ -70,7 +79,7 @@
 						"exec": [
 							"tests[\"Status code is 400\"] = responseCode.code === 400;",
 							"var jsonData = JSON.parse(responseBody);",
-							"tests[\"errors has three items\"] = jsonData.errors.length == 3;",
+							"tests[\"errors has three items\"] = jsonData.errors.length == 4;",
 							"",
 							"pm.test(\"errors matches expected json\", function () {",
 							"    var jsonData2 = pm.response.json();",
@@ -87,6 +96,12 @@
 							"            \"param\": \".asset\",",
 							"            \"type\": \"invalid_request_error\",",
 							"            \"message\": \"should have required property 'title'\"",
+							"        },",
+							"        {",
+							"            \"code\": \"required\",",
+							"            \"param\": \".asset\",",
+							"            \"type\": \"invalid_request_error\",",
+							"            \"message\": \"should have required property 'cargo'\"",
 							"        },",
 							"        {",
 							"            \"code\": \"required\",",
@@ -108,6 +123,11 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
 						"description": ""
 					}
 				],
@@ -151,6 +171,9 @@
 							"    && listedDate.getMonth() == now.getMonth()",
 							"    && listedDate.getDay()   == now.getDay()",
 							");",
+							"const baseUri = pm.variables.get(\"splyt-api-uri\");",
+							"const uri = `${baseUri}/api/listings/${id}`;",
+							"tests[\"href is correct\"] = jsonData.href == uri;",
 							"",
 							"pm.test(\"Response looks good enough\", function () {",
 							"    var closeEnough = pm.response.json();",
@@ -158,10 +181,27 @@
 							"    delete closeEnough.asset.id;",
 							"    delete closeEnough.dateListed;",
 							"    delete closeEnough.listedByUserId;",
+							"    delete closeEnough.href;//tested earlier",
 							"    console.log(closeEnough);",
 							"    pm.expect(closeEnough).to.eql({",
 							"        \"title\": \"Sed accumsan felis. Ut at dolor quis odio consequat varius. Integer ac leo. Pellentesque ultrices mattis odio.\",",
 							"        \"asset\": {",
+							"            \"cargo\": {",
+							"                \"trim\": {",
+							"                    \"id\": \"AgwDAg8AAgY\",",
+							"                    \"name\": \"S Q4\"",
+							"                },",
+							"                \"model\": {",
+							"                    \"id\": \"DAMCDAQDCQs\",",
+							"                    \"name\": \"Ghibli\"",
+							"                },",
+							"                \"make\": {",
+							"                    \"id\": \"AAcEAA8NDwc\",",
+							"                    \"name\": \"Maserati\"",
+							"                },",
+							"                \"year\": 2017,",
+							"                \"type\": \"vehicle\"",
+							"            },",
 							"            \"title\": \"Sed accumsan felis. Ut at dolor quis odio consequat varius. Integer ac leo. Pellentesque ultrices mattis odio.\",",
 							"            \"totalPrice\": 97706,",
 							"            \"termType\": \"WEEKLY\",",
@@ -252,7 +292,11 @@
 							"console.log(\"lastCreated:\", lastCreated, expectedListingId);",
 							"tests[\"last-listing-id was found: \" + expectedListingId] = lastCreated;",
 							"tests[\"last-listing distance is truthy\"] = lastCreated.distance;",
-							""
+							"",
+							"const item0 = searchResults.items[0];",
+							"const baseUri = pm.variables.get(\"splyt-api-uri\");",
+							"const uri = `${baseUri}/api/listings/${item0.id}`;",
+							"tests[\"item[0] has correct href\"] = item0.href == uri;"
 						]
 					}
 				}
@@ -371,7 +415,11 @@
 						"exec": [
 							"tests[\"Status code is 200\"] = responseCode.code === 200;",
 							"var jsonData = JSON.parse(responseBody);",
-							"tests[\"isActive === false\"] = jsonData.isActive === false;"
+							"tests[\"isActive === false\"] = jsonData.isActive === false;",
+							"",
+							"const baseUri = pm.variables.get(\"splyt-api-uri\");",
+							"const uri = `${baseUri}/api/listings/${jsonData.id}`;",
+							"tests[\"href is correct\"] = jsonData.href == uri;"
 						]
 					}
 				}
