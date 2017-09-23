@@ -9,8 +9,18 @@ const send500 = helpers.send500,
       send404Message = helpers.send404Message,
       sendValidationError = helpers.sendValidationError,
       sendNotAuthenticated = helpers.sendNotAuthenticated;
-
+const Scrub = require("./../app/Scrub");
+const standardMongoScrub = Scrub.standardMongoScrub;
+const deleteSensitiveFields = Scrub.deleteSensitiveFields;
+const _ = require("lodash");
 var Jwt = require("./../app/Jwt");
+
+function scrubUser(user) {
+  const copy = Object.assign({}, user);
+  return deleteSensitiveFields(
+    standardMongoScrub(copy)
+  );
+}
 /**
  * Login required middleware
  */
@@ -38,20 +48,17 @@ exports.loginGet = function(req, res) {
  * POST /login
  */
 exports.loginPost = function(req, res, next) {
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
+  req.assert('username', 'Username cannot be blank').notEmpty();
   req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
   var errors = req.validationErrors();
 
   if (errors) {
     return sendValidationError(res, errors);
   }
 
-  passport.authenticate('local', function(err, user, info) {
+  passport.authenticate('local', (err, user, info)=>{
     if (!user) {
-      return sendValidationError(res, err);
+      return sendValidationError(res, info);
     }
     req.logIn(user, function(err) {
       if(err) {
@@ -75,36 +82,58 @@ exports.logout = function(req, res) {
  * POST /signup (POST /users)
  */
 exports.signupPost = function(req, res, next) {
-  req.assert('name', 'Name cannot be blank').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('error', errors);
+  const CreateAccountRequest = require("./../accounts/CreateAccountRequest");
+  const SingleErrorResponse = require("./../app/SingleErrorResponse");
+  const makeError = SingleErrorResponse.InvalidRequestError;
+  const validator = CreateAccountRequest.validator;
+  const uniqueCode = SingleErrorResponse.codes.unique;
+  
+  const input = req.body;
+  const errors = validator.validate(input);
+  if (errors.length > 0) {
     return sendValidationError(res, errors);
   }
-
-  User.findOne({ email: req.body.email }, function(err, user) {
-    if (user) {
-      const errors = [
-        { message: 'The email address you have entered is already associated with another account.' }
-      ]
+  function createUser() {
+    // Chop off any superfluous fields from the request body
+    const userDoc = _.pick(input, validator.schema.required);
+    
+    User.create(userDoc, (err, made)=>{
+      if(err) {
+        send500(res, err);
+      } else {
+        send200(res, scrubUser(made));
+      }
+    });
+  };
+  /* Check if username or e-mail is in use already */
+  const username = input.username, email = input.email;
+  const query = User.find({})
+    .select('email username')
+    .or({username})
+    .or({email})
+    .limit(2);
+  query.exec((err, matchingUsers)=>{
+    if(matchingUsers && matchingUsers.length) {
+      const errors = [];
+      if(matchingUsers.find((i)=>i.username==username)) {
+        errors.push(makeError({
+          code:uniqueCode,
+          param:"username",
+          message:"This username is already in use."
+        }));
+      }
+      if(matchingUsers.find((i)=>i.email==email)) {
+        errors.push(makeError({
+          code:uniqueCode,
+          param:"email",
+          message:"This email address is already in use."
+        }));
+      }
       return sendValidationError(res, errors);
+    } else {
+      return createUser();
     }
-    user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-    });
-    user.save(function(err) {
-      send200(res, {
-        id:user._id
-      })
-    });
+    send500(res, null);
   });
 };
 exports.accountGet = function(req, res, next) {
@@ -112,7 +141,7 @@ exports.accountGet = function(req, res, next) {
     if(err) {
       return sendValidationError(res, [{message:"Something bad happened"}]);
     }
-    return send200(res, user);
+    return send200(res, scrubUser(user));
   });
 }
 /**

@@ -11,7 +11,8 @@ var schemaOptions = {
 
 var userSchema = new mongoose.Schema({
   name: String,
-  email: { type: String, unique: true},
+  username: { type: String, unique: true, required: true},
+  email: { type: String, unique: true, required: true},
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,

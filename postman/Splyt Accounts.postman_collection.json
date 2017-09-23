@@ -21,7 +21,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\":\"{{splyt-full-name}}\",\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\",\n\t\"address\":\"{{splyt-address}}\",\n\t\"phone\":\"{{splyt-phone}}\"\n}"
+					"raw": "{\n\t\"name\":\"{{splyt-full-name}}\",\n\t\"username\":\"{{splyt-username}}\",\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\",\n\t\"address\":\"{{splyt-address}}\",\n\t\"phone\":\"{{splyt-phone}}\"\n}"
 				},
 				"description": ""
 			},
@@ -58,7 +58,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\"\n}"
+					"raw": "{\n\t\"username\":\"{{splyt-username}}\",\n\t\"password\":\"{{splyt-password}}\"\n}"
 				},
 				"description": ""
 			},

@@ -9,6 +9,13 @@ describe('send500', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(error);
   });
+  it('should give standard error if error not passed', () => {
+    const res = mockRes();
+    const expected = { message: "We encountered an unexpected error, sorry." };
+    helpers.send500(res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(expected);
+  });
 });
 describe('send200', () => {
   it('should call res.status(200).json({payload})', () => {

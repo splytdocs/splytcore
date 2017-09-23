@@ -1,8 +1,10 @@
 module.exports.send500 = function(res, error) {
   // todo: Make this detect if the person can see 
   // full errors (dev/debug only)
-  const sendFullError = true;
-  const toSend = sendFullError ? error : { message: "We encountered an unexpected error, sorry." };
+  const fallback = { message: "We encountered an unexpected error, sorry." };
+  if(error == null) error = fallback;
+  const sendFullError = true ;
+  const toSend = sendFullError ? error : fallback; 
   res.status(500).json(toSend);
 };
 module.exports.send200 = function(res, output) {

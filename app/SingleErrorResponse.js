@@ -8,6 +8,9 @@ class SingleErrorResponse {
     }, document);
   }
 }
+module.exports.codes = {
+  unique:"unique"
+};
 module.exports.SingleErrorResponse = SingleErrorResponse;
 module.exports.InvalidRequestError = (document)=>{
   return new SingleErrorResponse(Object.assign({}, document, {
