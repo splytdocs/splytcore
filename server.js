@@ -45,12 +45,12 @@ var app = express();
 
 
 mongoose.Promise = global.Promise;
-//mongoose.set('debug', true)
 mongoose.connect(process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
 });
+if(process.env.DEBUG_MONGODB) mongoose.set('debug', true);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('port', process.env.PORT || 3000);
@@ -119,6 +119,10 @@ app.post('/api/listings/',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
   listings.create);
+app.get('/api/listings/mine',
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout,
+  listings.mine);
 app.get('/api/listings/search', 
   standardTimeout(), haltOnTimedout, 
   listings.search);

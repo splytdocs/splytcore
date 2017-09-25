@@ -5,10 +5,10 @@ const send500 = helpers.send500,
       send404Message = helpers.send404Message,
       sendValidationError = helpers.sendValidationError;
 const ListingConversion = require("./ListingConversion");
-const toListingResponse = ListingConversion.toListingResponse();
-
+const mutateToAssetResponse = ListingConversion.mutateToAssetResponse;
 const Scrub = require("./../app/Scrub");
 const standardMongoScrub = Scrub.standardMongoScrub;
+const Asset = require("./../models/Asset");
 
 function makeCriteria(userId) {
   return searchCriteriaBuilder({
@@ -16,18 +16,25 @@ function makeCriteria(userId) {
     limit: 0
   });
 }
-function prepListing(listing, req) {
-  var output = (
-      standardMongoScrub(
-      toListingResponse(listing, null, req)));
-  output.location = standardMongoScrub(output.location);;
-  output.asset = standardMongoScrub(output.asset)
+function prepAsset(record, req) {
+  const output = standardMongoScrub(record);
+  ListingConversion.mutateToAssetResponse(output);
   return output;
+}
+function findOwnedAssets(userId) {
+  return new Promise((resolve, reject)=>{ 
+    const criteria = {
+      "ownership.stakes.userId":userId
+    };
+    Asset.find(criteria, (err, results)=>{
+      if(err) reject(err);
+      else resolve(results);
+    });
+  });
 }
 module.exports.getOwnershipController = listingRepo => (req, res, next)=>{
   const userId = req.user.id;
-  const criteria = makeCriteria(userId);
-  const promise = listingRepo.search(criteria);
+  const promise = findOwnedAssets(userId);
   promise.catch(err=>{
     send500(res, err)
   });
@@ -35,14 +42,15 @@ module.exports.getOwnershipController = listingRepo => (req, res, next)=>{
     if(!searchResults) {
       return send500(res);
     }
-    const prepOne = (i)=>prepListing(i, req);
-    const output = searchResults.data.map(prepOne);
+    const prepOne = (i)=>prepAsset(i, req);
+    const output = {
+      items: searchResults.map(prepOne)
+    };
     send200(res, output);
   });
 };
 function prepAssetAndSend200(res, record) {
-  const output = standardMongoScrub(record);
-  ListingConversion.mutateToAssetResponse(output);
+  const output = prepAsset(record);
   send200(res, output)
 }
 function persistAssetAndRespond(res, assetRecord) {

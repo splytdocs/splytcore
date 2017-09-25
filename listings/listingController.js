@@ -162,3 +162,25 @@ exports.delete = function(req, res, next) {
     handleCommonListingError(res, id, data);
   });
 };
+
+exports.mine = function(req, res, next) {
+  const userId = req.user.id;
+  const criteria = {
+    listedByUserId: userId,
+    includeDeactivated: true
+  };
+  const results = repo.search(criteria);
+  results.then((envelope)=> {
+    if(!envelope.error) {
+      const searchResults = envelope.data;
+      const output = {
+        items:searchResults
+          .map((i)=>toListingResponse(i, null, req))
+        };
+      send200(res, output);
+    } else {
+      send500(res, envelope.error)
+    }
+  });
+  results.catch((envelope)=>send500(res, envelope.error));
+};

@@ -5,8 +5,12 @@ var ObjectId = mongoose.Schema.Types.ObjectId;
 
 exports.search = function(criteria) {
   return new Promise((resolve, reject)=>{
-    const x = criteria.includeDeactivated ? {}:{isActive:true};
-    let query = Listing.find(x);
+    let x = criteria.includeDeactivated ? {}:{isActive:true};
+    let y = Object.assign({}, x, criteria);
+    delete y.limit;
+    delete y.offset;
+    delete y.includeDeactivated;
+    let query = Listing.find(y);
     if(criteria.limit && criteria.limit > 0) {
       query.limit(criteria.limit);
     }
