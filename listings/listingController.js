@@ -1,9 +1,7 @@
 const path = require('path');
-const geolib = require("geolib");
 const repo = require("./contextualListingRepoService").choose();
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const ListingResponse = require("./listingResponse")
 const ethereum = require(path.resolve("./controllers/ethereum"));
 const clr = require("./create/AjvCreateListingSchemaValidator");
 const helpers = require("./../app/ResponseHelpers");
@@ -12,9 +10,12 @@ const send500 = helpers.send500,
       send404Message = helpers.send404Message,
       sendValidationError = helpers.sendValidationError;
 const ListingSearchParameters = require("./ListingSearchParameters");
+const ListingConversion = require("./ListingConversion");
+const toListingResponse = ListingConversion.toListingResponse();
+const mapWithDistance = ListingConversion.mapWithDistance();
+
 
 var Asset = require("./../models/Asset");
-let baseUri = null;
 
 function getUserFromContext(req) {
   /* Be sure you're authenticated, otherwise this won't be here */
@@ -24,60 +25,9 @@ function getUserFromContext(req) {
     name:req.user.name
   };
 };
-function toListingResponse(fromDb, createdAsset, req) {
-  if(!fromDb) return null;
-  const doc = fromDb._doc;
-  const made = ListingResponse.convertFromDbDocument(doc);
-  function removeMongoFields(toAlter) {
-    if(!toAlter) return toAlter;
-    delete toAlter.__v;
-    delete toAlter._id;
-    delete toAlter.createdAt;
-    delete toAlter.updatedAt;
-    return toAlter;
-  }
-  function fixUpAsset(asset) {
-    // todo: refactor this a lot
-    asset.id = asset._id;
-    removeMongoFields(asset);
-    if(asset.costBreakdown){
-      asset.costBreakdown.forEach(i=>removeMongoFields(i._doc));
-    }
-  }
-  if(fromDb.asset) {
-    made.asset = fromDb.asset._doc;
-  }
-  if(createdAsset) {
-    made.asset = createdAsset._doc;
-  } 
-  if(made.asset) {
-    fixUpAsset(made.asset);
-  }
-  if(made.location) {
-    removeMongoFields(made.location._doc);
-  }
-  if(!baseUri && req) {
-    baseUri = req.protocol + '://' + req.get('host')
-  }
-  function amendHref(target) {
-    if(!target.href && baseUri) {
-      target.href = `${baseUri}/api/listings/${target.id}`;
-    }
-  }
-  amendHref(made);
-  return made;
-}
 
 function send404ListingNotFound(res, id) {
   send404Message(res, `Listing '${id}' not found.`);
-}
-
-function mapWithDistance(to, from) {
-  const actualTo = to.location._doc || to.location;
-  const distance = geolib.getDistance(actualTo, from);
-  return Object.assign({}, to, {
-    distance: distance
-  });
 }
 
 //get /listings/search?location&sort&order&limit
@@ -135,6 +85,7 @@ exports.getById = function(req, res, next) {
 function persistAsset(listingRequest) {
   return new Promise((resolve, reject)=>{
     const document = Object.assign({}, listingRequest.asset);
+    document.ownership = {};
     Asset.create(document, (error, object)=>{
       if(error) { 
         reject({error: error}); 

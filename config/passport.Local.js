@@ -1,4 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
+const Scrub = require("./../app/Scrub");
+const standardMongoScrub = Scrub.standardMongoScrub;
+const deleteSensitiveFields = Scrub.deleteSensitiveFields;
 
 module.exports.use = (passport, User) => {
   // Sign in with Email and Password

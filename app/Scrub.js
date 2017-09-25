@@ -12,6 +12,7 @@ module.exports.standardMongoScrub = (target)=>{
   this.deleteMongoFields(output);
   return output;
 };
+
 module.exports.deleteSensitiveFields = (target)=>{
   if(target === null || target === undefined) return target;
   delete target.password;

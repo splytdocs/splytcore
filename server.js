@@ -108,10 +108,13 @@ app.get('/api/accounts/auth/twitter/callback',
 
 //todo: improve this
 var listings = require('./listings/listingController');
+const Ownership = require('./listings/Ownership');
 var standardTimeout = function() { return timeout('10s'); }
 function haltOnTimedout (req, res, next) {
   if (!req.timedout) next()
 }
+
+const listingsRepo = require("./listings/contextualListingRepoService").choose();
 app.post('/api/listings/', 
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
@@ -123,9 +126,17 @@ app.get('/api/listings/:id',
   standardTimeout(), haltOnTimedout, 
   listings.getById);
 app.delete('/api/listings/:id',
-  userCont.ensureAuthenticated, 
+  requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout, 
   listings.delete);
+app.get('/api/ownership',
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout,
+  Ownership.getOwnershipController(listingsRepo));
+app.put('/api/ownership',
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout,
+  Ownership.putOwnershipController(listingsRepo));
 
 // Production error handler
 if (app.get('env') === 'production') {

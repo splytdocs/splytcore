@@ -21,6 +21,25 @@ var costBreakdownSchema = new mongoose.Schema({
     min: 0
   }
 });
+var stakeSchema = new mongoose.Schema({
+  userId: {
+    type: ObjectId,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  }
+})
+
+var ownershipSchema = new mongoose.Schema({
+  status: {
+    type: String,
+    required: true,
+    default: "OPEN"
+  },
+  stakes: [stakeSchema]
+});
 
 var assetSchema = new mongoose.Schema({
   // todo: revisit this, how should we store photos and their data? Probably just
@@ -62,7 +81,11 @@ var assetSchema = new mongoose.Schema({
     default: 0,
     required: false
   },
-  amountFunded: 0,
+  amountFunded: {
+    type: Number,
+    default: 0,
+    required: true
+  },
   title: {
     type: String,
     required: true
@@ -70,9 +93,34 @@ var assetSchema = new mongoose.Schema({
   cargo: {
     type: Object,
     required: false
-  }
+  },
+  ownership: ownershipSchema
 }, schemaOptions);
 
-var Asset = mongoose.model('Asset', assetSchema);
 
+assetSchema.pre('save', function(next) {
+  console.log("presave asset", this);
+  recalculateAmountFunded.call(this);
+  next();
+});
+
+function recalculateStakes(on) {
+  let result = 0;
+  // todo: This doesn't seem like the right way
+  // iterate these inner properties 
+  var stakes = on._doc.ownership._doc.stakes;
+  for (var index = 0; index < stakes.length; index++) {
+    var element = stakes[index];
+    result += element._doc.amount;
+  }
+  return result;
+}
+function recalculateAmountFunded() {
+  const record = this;
+  const amountFunded = recalculateStakes(record);
+  record.amountFunded = amountFunded;
+}
+assetSchema.recalculateAmountFunded = recalculateAmountFunded;
+
+var Asset = mongoose.model('Asset', assetSchema);
 module.exports = Asset;
