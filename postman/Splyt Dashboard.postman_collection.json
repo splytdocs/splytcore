@@ -1,0 +1,155 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Splyt Dashboard",
+		"_postman_id": "49cae0a6-39fb-6223-fada-303a5c4ef492",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"pm.environment.set(\"splyt-bearer-token\", jsonData.token);",
+							"console.log(\"setting splyt-bearer-token!\")"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"{{splyt-username}}\",\n\t\"password\":\"{{splyt-password}}\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "View Owned Assets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"tests[\"body text does not contain _id\"] = responseBody.indexOf(\"_id\") == -1;",
+							"tests[\"status is open\"] = responseBody.indexOf(`status\":\"OPEN\"`) > -1;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/ownership",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"fakertonmcnotreal@mailinator.com\",\n\t\"password\":\"--15=record=SERVICE=think=67--\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create/update ownership amount",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"//tests[\"body text does not contain _id\"] = responseBody.indexOf(\"_id\") == -1;",
+							"tests[\"status is open\"] = responseBody.indexOf(`status\":\"OPEN\"`) > -1;",
+							"",
+							"var jsonData = pm.response.json();",
+							"const stakes = jsonData.ownership.stakes;",
+							"const totalStakes = stakes.map(i=>i.amount).reduce((a,b)=>a+b);",
+							"pm.test(`asset.amountFunded equals total of stakes (${totalStakes})`, function () {",
+							"    pm.expect(jsonData.amountFunded).to.eql(totalStakes);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{splyt-api-uri}}/api/ownership?assetId=59c86a222ada2300115e0a2a&amount=7000",
+					"host": [
+						"{{splyt-api-uri}}"
+					],
+					"path": [
+						"api",
+						"ownership"
+					],
+					"query": [
+						{
+							"key": "assetId",
+							"value": "59c86a222ada2300115e0a2a",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "amount",
+							"value": "7000",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
