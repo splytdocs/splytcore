@@ -150,6 +150,38 @@
 				"description": ""
 			},
 			"response": []
+		},
+		{
+			"name": "View all listings I've created",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"var jsonData = JSON.parse(responseBody);",
+							"var searchResults = jsonData;",
+							"tests[\"searchResults is truthy\"] = searchResults;",
+							"tests[\"searchResults.items is truthy\"] = searchResults.items;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/mine",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }
