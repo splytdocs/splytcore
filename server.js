@@ -63,6 +63,13 @@ app.use(methodOverride('_method'));
 app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(flash());
 
+app.use(function(req, res, next) {
+  // enables CORS for all endpoints
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 
 app.use(passport.initialize());
 //app.use(passport.session());
