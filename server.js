@@ -133,6 +133,9 @@ app.get('/api/listings/mine',
 app.get('/api/listings/search', 
   standardTimeout(), haltOnTimedout, 
   listings.search);
+app.post('/api/listings/search', 
+  standardTimeout(), haltOnTimedout, 
+  listings.search);
 app.get('/api/listings/:id', 
   standardTimeout(), haltOnTimedout, 
   listings.getById);

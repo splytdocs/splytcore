@@ -3,121 +3,134 @@ var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-exports.search = function(criteria) {
-  return new Promise((resolve, reject)=>{
-    let x = criteria.includeDeactivated ? {}:{isActive:true};
-    let y = Object.assign({}, x, criteria);
-    delete y.limit;
-    delete y.offset;
-    delete y.includeDeactivated;
-    let query = Listing.find(y);
-    if(criteria.limit && criteria.limit > 0) {
-      query.limit(criteria.limit);
+function searchByQuery(criteria, meta) {
+  return new Promise((resolve, reject) => {
+    if(!meta) meta = {};
+    let query = Listing.aggregate([
+      { "$lookup": {
+        "localField": "assetId",
+        "from": "assets",
+        "foreignField": "_id",
+        "as": "asset"
+      } },
+      { "$unwind": "$asset" }
+    ]);
+    query.match(criteria);
+    
+    if (meta.limit && meta.limit > 0) {
+      query.limit(meta.limit);
     }
-    if(criteria.offset && criteria.offset > 0) {
-      query.skip(criteria.offset);
+    if (meta.offset && meta.offset > 0) {
+      query.skip(meta.offset);
     }
-    query.exec((error, found)=> {
+    query.exec((error, found) => {
       const waitingFor = [];
-      if(error) { 
-        reject({error: error}); 
-      }
-      else {
-        const mapped = found.map((listing)=> {
-          const assetId1 = listing.assetId;
-          const assetId2 = listing._doc.assetId;
-          const withAsset = findAndAmendAsset(listing);
-           /* ignore responses for now */
-          withAsset.then((d)=>{});
-          withAsset.catch((e)=>{
-            console.log(".search:error amending asset to listing", arguments, listing);
-          });
-          waitingFor.push(withAsset);
-          return listing;
-        });
+      if (error) {
+        reject({error: error});
+      } else {
+        const mapped = found;
         const all = Promise.all(waitingFor);
-        all.then(()=>{
-          resolve({data:mapped});
+        all.then(() => {
+          resolve({data: mapped});
         });
-        all.catch(()=>{
-          resolve({data:mapped});
+        all.catch(() => {
+          resolve({data: mapped});
         });
       }
     });
   });
 };
-exports.findById = function(id) {
-  return new Promise((resolve, reject)=>{
-    Listing.findById(id)
-    .exec(function(error, found){
-      if(error) { 
-        reject({error: error}); 
-      }
-      else {
-        const withAsset = findAndAmendAsset(found);
-        withAsset.then(()=>{
-          resolve({data:found});
-        });
-        withAsset.catch((e)=>{
-          reject({error:e});
-        });
-      }
-    });
+exports.search = function (criteria) {
+  let x = criteria.includeDeactivated? {} : {isActive: true};
+  let y = Object.assign({}, x, criteria);
+  delete y.limit;
+  delete y.offset;
+  delete y.includeDeactivated;
+  delete y.latitude;
+  delete y.longitude;
+
+  return searchByQuery(y, {
+    limit:y.limit,
+    offset:y.offset
+  });
+};
+exports.searchByQuery = searchByQuery;
+exports.findById = function (id) {
+  return new Promise((resolve, reject) => {
+    Listing
+      .findById(id)
+      .exec(function (error, found) {
+        if (error) {
+          reject({error: error});
+        } else {
+          const withAsset = findAndAmendAsset(found);
+          withAsset.then(() => {
+            resolve({data: found});
+          });
+          withAsset.catch((e) => {
+            reject({error: e});
+          });
+        }
+      });
   });
 };
 function findAndAmendAsset(listing) {
-  return new Promise((resolve, reject)=>{
-    if(!listing) {
+  return new Promise((resolve, reject) => {
+    if (!listing) {
       // Couldn't find the listing, don't bother looking for an asset
       resolve(listing);
       return;
     }
-    Asset.findById(listing.assetId).exec((error, asset)=>{
-      if(error) reject(error);
-      else {
-        listing.asset = asset;
-        resolve(listing);
-      }
-    });
+    Asset
+      .findById(listing.assetId)
+      .exec((error, asset) => {
+        if (error) 
+          reject(error);
+        else {
+          listing.asset = asset;
+          resolve(listing);
+        }
+      });
   });
 };
-exports.deactivate = function(id) {
-  return new Promise((resolve, reject)=>{
-    const options = {new:true};
-    Listing.findByIdAndUpdate(id, 
-      { $set: { isActive:false }}, 
-      options, 
-      (error, found, zed)=>{
-        if(error) { 
-          reject({error: error}); 
-        }
-        else {
-          const withAsset = findAndAmendAsset(found);
-          withAsset.then(()=>{
-            resolve({data:found});
-          });
-          withAsset.catch((e)=>{
-            reject({error:e});
-          });
-        }
+exports.deactivate = function (id) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      new: true
+    };
+    Listing.findByIdAndUpdate(id, {
+      $set: {
+        isActive: false
+      }
+    }, options, (error, found, zed) => {
+      if (error) {
+        reject({error: error});
+      } else {
+        const withAsset = findAndAmendAsset(found);
+        withAsset.then(() => {
+          resolve({data: found});
+        });
+        withAsset.catch((e) => {
+          reject({error: e});
+        });
+      }
     });
   });
 };
 function convertListingRequestToDocument(listingRequest) {
-  const doc = Object.assign({},listingRequest.listing);
+  const doc = Object.assign({}, listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;
   doc.assetId = listingRequest.assetId;
   return doc;
 }
-exports.addNew = function(listingRequest) {
-  return new Promise((resolve, reject)=>{
+exports.addNew = function (listingRequest) {
+  return new Promise((resolve, reject) => {
     const document = convertListingRequestToDocument(listingRequest);
-    Listing.create(document, (error, object)=>{
-      if(error) { 
-        reject({error: error}); 
-      }
-      else {
-        resolve({data:object})
+    Listing.create(document, (error, object) => {
+      if (error) {
+        reject({error: error});
+      } else {
+        resolve({data: object})
       }
     });
   });

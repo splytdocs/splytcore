@@ -34,9 +34,27 @@ function send404ListingNotFound(res, id) {
 exports.search = function(req, res, next) {
   req.assert('latitude', 'latitude cannot be blank').notEmpty();
   req.assert('longitude', 'longitude cannot be blank').notEmpty();
-  const criteria = ListingSearchParameters.build(req.query);
-  const results = repo.search(criteria);
-  const from = {latitude:criteria.latitude, longitude:criteria.longitude};
+  
+  let results;
+  let criteria;
+  let from = {latitude:0, longitude:0}
+  if(req.method == "GET") {
+    criteria = ListingSearchParameters.build(req.query);
+    from = {
+      latitude: criteria.latitude,
+      longitude:criteria.longitude
+    };
+    results = repo.search(criteria);
+  } else {
+    var criteria2 = Object.assign({}, req.body);
+    const meta = Object.assign({}, criteria2.meta);
+    delete criteria2.meta;
+    from = {
+      latitude: req.query.latitude,
+      longitude:req.query.longitude
+    };
+    results = repo.searchByQuery(criteria2.match, meta);
+  }
 
   results.then((envelope)=> {
     if(!envelope.error) {
@@ -166,10 +184,9 @@ exports.delete = function(req, res, next) {
 exports.mine = function(req, res, next) {
   const userId = req.user.id;
   const criteria = {
-    listedByUserId: userId,
-    includeDeactivated: true
+    "listedByUserId": new mongoose.Types.ObjectId(userId)
   };
-  const results = repo.search(criteria);
+  const results = repo.searchByQuery(criteria);
   results.then((envelope)=> {
     if(!envelope.error) {
       const searchResults = envelope.data;

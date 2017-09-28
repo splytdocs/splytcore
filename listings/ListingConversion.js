@@ -1,5 +1,6 @@
 const BackupListingResponse = require("./listingResponse");
 const BackupGeolib = require("geolib");
+const _docOrSelf = require("./../app/Scrub")._docOrSelf;
 
 function removeMongoFields(toAlter) {
   if (!toAlter) 
@@ -16,12 +17,12 @@ function mutateToAssetResponse(asset) {
   removeMongoFields(asset);
   if (asset.costBreakdown) {
     asset.costBreakdown
-      .forEach(i => removeMongoFields(i._doc));
+      .forEach(i => removeMongoFields(_docOrSelf(i)));
   }
   if(asset.ownership && asset.ownership.stakes) {
-    removeMongoFields(asset.ownership._doc);
+    removeMongoFields(_docOrSelf(asset.ownership));
     asset.ownership.stakes
-      .forEach(i => removeMongoFields(i._doc));
+      .forEach(i => removeMongoFields(_docOrSelf(i)));
   }
   return asset;
 }
@@ -33,29 +34,32 @@ function inferUri(req, listing) {
 module.exports.inferUri = inferUri;
 module.exports.mapWithDistance = (geolib = BackupGeolib) => (to, from) => {
   const actualTo = to.location._doc || to.location;
-  const distance = geolib.getDistance(actualTo, from);
-  return Object.assign({}, to, {distance: distance});
+  let distance = undefined;
+  if(from.latitude!==undefined || from.longitude!==undefined) {
+    distance = geolib.getDistance(actualTo, from);
+  }
+  return Object.assign({}, to, {distance});
 };
 module.exports.mutateToAssetResponse = mutateToAssetResponse;
 module.exports.toListingResponse = (ListingResponse = BackupListingResponse) => (fromDb, createdAsset, req) => {
   if (!fromDb) 
     return null;
-  const doc = fromDb._doc;
+  const doc = _docOrSelf(fromDb);
   const made = ListingResponse.convertFromDbDocument(doc);
   function fixUpAsset(asset) {
     mutateToAssetResponse(asset);
   }
-  if (fromDb.asset) {
+  if (fromDb.asset && fromDb.asset._doc) {
     made.asset = fromDb.asset._doc;
   }
   if (createdAsset) {
-    made.asset = createdAsset._doc;
+    made.asset = _docOrSelf(createdAsset);
   }
   if (made.asset) {
     fixUpAsset(made.asset);
   }
   if (made.location) {
-    removeMongoFields(made.location._doc);
+    removeMongoFields(_docOrSelf(made.location));
   }
   function amendHref(target) {
     target.href = inferUri(req, target);

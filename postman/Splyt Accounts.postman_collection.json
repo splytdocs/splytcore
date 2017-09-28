@@ -28,6 +28,26 @@
 			"response": []
 		},
 		{
+			"name": "Create account copy",
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\":\"{{splyt-full-name}}\",\n\t\"username\":\"{{splyt-username}}\",\n\t\"email\":\"{{splyt-email}}\",\n\t\"password\":\"{{splyt-password}}\",\n\t\"address\":\"{{splyt-address}}\",\n\t\"phone\":\"{{splyt-phone}}\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "Login",
 			"event": [
 				{

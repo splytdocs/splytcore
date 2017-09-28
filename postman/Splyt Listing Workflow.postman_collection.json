@@ -8,6 +8,43 @@
 	},
 	"item": [
 		{
+			"name": "Login copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"pm.environment.set(\"splyt-bearer-token\", jsonData.token);",
+							"console.log(\"setting splyt-bearer-token!\")"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/accounts/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"{{splyt-username}}\",\n\t\"password\":\"{{splyt-password}}\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "Listing: Create one (201)",
 			"event": [
 				{
@@ -313,7 +350,12 @@
 							"const item0 = searchResults.items[0];",
 							"const baseUri = pm.variables.get(\"splyt-api-uri\");",
 							"const uri = `${baseUri}/api/listings/${item0.id}`;",
-							"tests[\"item[0] has correct href\"] = item0.href == uri;"
+							"tests[\"item[0] has correct href\"] = item0.href == uri;",
+							"",
+							"tests[\"item[0].location._id is undefined\"] = item0.location._id === undefined;",
+							"tests[\"item[0].asset._id is undefined\"] = item0.asset._id === undefined;",
+							"tests[\"item[0].asset.costBreakdown[0]._id is undefined\"] = item0.asset.costBreakdown[0]._id === undefined;",
+							"tests[\"body text does not contain _id\"] = responseBody.indexOf(\"_id\") == -1;"
 						]
 					}
 				}
@@ -417,6 +459,38 @@
 				},
 				"method": "GET",
 				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Listing: All my listings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"var jsonData = JSON.parse(responseBody);",
+							"var searchResults = jsonData;",
+							"tests[\"searchResults is truthy\"] = searchResults;",
+							"tests[\"searchResults.items is truthy\"] = searchResults.items;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{splyt-api-uri}}/api/listings/mine",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{splyt-bearer-token}}",
+						"description": ""
+					}
+				],
 				"body": {},
 				"description": ""
 			},

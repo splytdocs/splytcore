@@ -18,3 +18,8 @@ module.exports.deleteSensitiveFields = (target)=>{
   delete target.password;
   return target;
 };
+module.exports._docOrSelf = (target)=>{
+  if(target === null || target === undefined) return target;
+  if(target._doc !== undefined) return target._doc;
+  return target;
+}
