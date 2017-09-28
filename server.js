@@ -152,6 +152,43 @@ app.put('/api/ownership',
   standardTimeout(), haltOnTimedout,
   Ownership.putOwnershipController(listingsRepo));
 
+
+const Upload = require("./photos/Upload");
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
+const photoConfig = {
+  bucketName: process.env.ASSET_PHOTOS_BUCKET_NAME,
+  uri: process.env.ASSET_PHOTOS_BASE_URI,
+  maxPhotos: 3
+};
+var path = require('path');
+
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: photoConfig.bucketName,
+    metadata: function (req, file, cb) {
+      cb(null, {fieldName: file.fieldname});
+    },
+    key: function (req, file, cb) {
+      const assetId = req.params.id;
+      const now = Date.now().toString();
+      const ext = path.extname(file.originalname);
+      const name = `${assetId}/${now}${ext}`;
+      cb(null, name);
+    }
+  })
+});
+const Asset = require("./models/Asset");
+const associator = Upload.associateWithAsset(Asset);
+app.post('/api/assets/:id/photos',
+  //standardTimeout(), haltOnTimedout,
+  upload.array('photos', photoConfig.maxPhotos),
+  Upload.controller(associator)
+);
+
 // Production error handler
 if (app.get('env') === 'production') {
   app.use(function(err, req, res, next) {

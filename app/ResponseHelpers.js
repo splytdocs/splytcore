@@ -10,6 +10,9 @@ module.exports.send500 = function(res, error) {
 module.exports.send200 = function(res, output) {
   res.status(200).json(output);
 };
+module.exports.send201 = function(res, output) {
+  res.status(201).json(output);
+};
 module.exports.send404Message = function(res, message) {
   res.status(404).send(message);
 }

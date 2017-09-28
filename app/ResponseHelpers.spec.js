@@ -26,6 +26,15 @@ describe('send200', () => {
     expect(res.json).toHaveBeenCalledWith(payload);
   });
 });
+describe('send201', () => {
+  it('should call res.status(201).json({payload})', () => {
+    const res = mockRes();
+    const payload = {test:"1"};
+    helpers.send200(res, payload);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(payload);
+  });
+});
 describe('send404Message', () => {
   it('should call res.status(404).send(message)', () => {
     const res = mockRes();
