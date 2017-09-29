@@ -24,6 +24,10 @@ function mutateToAssetResponse(asset) {
     asset.ownership.stakes
       .forEach(i => removeMongoFields(_docOrSelf(i)));
   }
+  if(asset.photos) {
+    asset.photos
+      .forEach(i => removeMongoFields(_docOrSelf(i)));
+  }
   return asset;
 }
 

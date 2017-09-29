@@ -41,13 +41,23 @@ var ownershipSchema = new mongoose.Schema({
   stakes: [stakeSchema]
 });
 
-var assetSchema = new mongoose.Schema({
-  // todo: revisit this, how should we store photos and their data? Probably just
-  // store a relative uri here
-  photoUri: {
+var photosSchema = new mongoose.Schema({
+  uri: {
     type: String,
+    required: true
+  },
+  userId: {
+    type: ObjectId,
     required: false
   },
+  tags:{
+    type: [String],
+    required: false,
+    default:[]
+  }
+});
+
+var assetSchema = new mongoose.Schema({
   // todo: What about physical assets like season tickets? Do those fall into this
   // model, or does it at least allow us to expand to that without painting
   // ourselves into a corner? re:terms/termType Might be thinking about this too
@@ -66,10 +76,7 @@ var assetSchema = new mongoose.Schema({
     required: true
   },
   costBreakdown: [costBreakdownSchema],
-  photos: {
-    type: Array,
-    required: false
-  },
+  photos: [photosSchema],
   mode: {
     type: String,
     required: false
@@ -97,17 +104,14 @@ var assetSchema = new mongoose.Schema({
   ownership: ownershipSchema
 }, schemaOptions);
 
-
-assetSchema.pre('save', function(next) {
-  console.log("presave asset", this);
+assetSchema.pre('save', function (next) {
   recalculateAmountFunded.call(this);
   next();
 });
 
 function recalculateStakes(on) {
   let result = 0;
-  // todo: This doesn't seem like the right way
-  // iterate these inner properties 
+  // todo: This doesn't seem like the right way iterate these inner properties
   var stakes = on._doc.ownership._doc.stakes;
   for (var index = 0; index < stakes.length; index++) {
     var element = stakes[index];

@@ -14,6 +14,10 @@ var timeout = require('connect-timeout');
 var helpers = require("./app/ResponseHelpers");
 var util = require("util");
 
+const AssetRepo = require("./models/Asset");
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+
 // Load environment variables from .env file
 if(process.env.NODE_ENV !== 'production') {
   var dotenv = require('dotenv');
@@ -155,37 +159,28 @@ app.put('/api/ownership',
 
 const Upload = require("./photos/Upload");
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
-const photoConfig = {
-  bucketName: process.env.ASSET_PHOTOS_BUCKET_NAME,
-  uri: process.env.ASSET_PHOTOS_BASE_URI,
-  maxPhotos: 3
+const s3cfg = {
+  accessKeyId: process.env.aws_access_key_id,
+  secretAccessKey: process.env.aws_secret_access_key,
+  region: process.env.aws_region
 };
-var path = require('path');
-
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const upload = multer({
+const s3 = new AWS.S3(s3cfg);
+const photoConfig = Upload.getPhotoConfig();
+const uploadMiddleware = multer({
   storage: multerS3({
     s3: s3,
     bucket: photoConfig.bucketName,
     metadata: function (req, file, cb) {
       cb(null, {fieldName: file.fieldname});
     },
-    key: function (req, file, cb) {
-      const assetId = req.params.id;
-      const now = Date.now().toString();
-      const ext = path.extname(file.originalname);
-      const name = `${assetId}/${now}${ext}`;
-      cb(null, name);
-    }
+    key: Upload.generateFileKey(Date.now)
   })
 });
-const Asset = require("./models/Asset");
-const associator = Upload.associateWithAsset(Asset);
+const associator = Upload.associateWithAsset(AssetRepo);
 app.post('/api/assets/:id/photos',
   //standardTimeout(), haltOnTimedout,
-  upload.array('photos', photoConfig.maxPhotos),
+  requireJwtAuthentication(),
+  uploadMiddleware.array('photos', photoConfig.maxPhotos),
   Upload.controller(associator)
 );
 

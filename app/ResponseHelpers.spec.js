@@ -30,7 +30,7 @@ describe('send201', () => {
   it('should call res.status(201).json({payload})', () => {
     const res = mockRes();
     const payload = {test:"1"};
-    helpers.send200(res, payload);
+    helpers.send201(res, payload);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(payload);
   });

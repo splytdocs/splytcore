@@ -29,25 +29,6 @@ describe('sign', () => {
     expect(decoded.iss).toEqual(opts.issuer);
     expect(decoded.name).toEqual(user.name);
   });
-  it('should use process.env for jwt options when omitted', () => {
-    const user = {
-      id:"12345",
-      name:"Fakerton"
-    };
-    const env = process.env;
-    const opts = {
-      secretOrKey: env.JWT_SECRET,
-      issuer: env.JWT_ISSUER,
-      audience: env.JWT_AUDIENCE
-    };
-    expect(Jwt.options).toEqual(opts);
-    const signed = Jwt.sign(user);
-    const decoded = tokenizer.decode(signed, opts);
-    expect(decoded.aud).toEqual(opts.audience);
-    expect(decoded.id).toEqual(user.id);
-    expect(decoded.iss).toEqual(opts.issuer);
-    expect(decoded.name).toEqual(user.name);
-  });
 });
 describe('makeAndSignUserToken', () => {
   it('should make an object with a token property with a value that decodes to the right outputs', () => {
