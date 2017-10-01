@@ -3,6 +3,8 @@ var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.Schema.Types.ObjectId;
+var mongooseAggregatePaginate = require('mongoose-aggregate-paginate');
+
 
 var schemaOptions = {
   timestamps: true,
@@ -71,6 +73,7 @@ var listingSchema = new mongoose.Schema({
   }
 }, schemaOptions);
 
+listingSchema.plugin(mongooseAggregatePaginate);
 var Listing = mongoose.model('Listing', listingSchema);
 
 module.exports = Listing;

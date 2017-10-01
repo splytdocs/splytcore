@@ -2,6 +2,7 @@ var Listing = require("../models/Listing");
 var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
+const mutatePaginationResponseOnto = require("./../app/Pagination").mutatePaginationResponseOnto;
 
 function searchByQuery(criteria, meta) {
   return new Promise((resolve, reject) => {
@@ -17,27 +18,25 @@ function searchByQuery(criteria, meta) {
     ]);
     query.match(criteria);
     
-    if (meta.limit && meta.limit > 0) {
-      query.limit(meta.limit);
-    }
-    if (meta.offset && meta.offset > 0) {
-      query.skip(meta.offset);
-    }
-    query.exec((error, found) => {
-      const waitingFor = [];
+    function withResults(error, data, numberOfPages, totalCount) {
       if (error) {
-        reject({error: error});
+        reject({error});
       } else {
-        const mapped = found;
-        const all = Promise.all(waitingFor);
-        all.then(() => {
-          resolve({data: mapped});
-        });
-        all.catch(() => {
-          resolve({data: mapped});
-        });
+        const output = {data};
+        mutatePaginationResponseOnto(output, {numberOfPages, totalCount});
+        resolve(output);
       }
-    });
+    }
+    function inferPage() {
+      const offset = meta.offset || 0;
+      const limit = meta.limit || 1;
+      return Math.ceil(offset/limit);
+    }
+    const paginationOptions = {
+      limit: meta.limit,
+      page: inferPage()
+    };
+    Listing.aggregatePaginate(query, paginationOptions, withResults);
   });
 };
 exports.search = function (criteria) {

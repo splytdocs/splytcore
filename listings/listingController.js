@@ -56,18 +56,20 @@ exports.search = function(req, res, next) {
     results = repo.searchByQuery(criteria2.match, meta);
   }
 
+  function transformOneRecord(i) {
+    const y = toListingResponse(i, null, req);
+    const z = mapWithDistance(y, from);
+    return z;
+  }
+
   results.then((envelope)=> {
     if(!envelope.error) {
       const searchResults = envelope.data;
-      const output = {
-        items:searchResults
-          .map((i)=>{
-            const y = toListingResponse(i, null, req);
-            const z = mapWithDistance(y, from);
-            return z;
-          })
-          .sort((a, b)=>a.distance-b.distance)
-        };
+      const pagination = envelope.pagination;
+      const items = searchResults
+        .map(transformOneRecord)
+        .sort((a, b)=>a.distance-b.distance);
+      const output = {items, pagination};
       send200(res, output);
     } else {
       send500(res, envelope.error)
