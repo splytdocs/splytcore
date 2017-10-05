@@ -92,6 +92,10 @@ module.exports.approve = (config)=> function(req, res) {
     });
   }
   User.findById(userId, (err, user)=>{
+    if(err) return send500(res, err);
+    if(!user) return send500(res, {
+      message:"User not found, or something bad happened."
+    });
     user.hasBeenApproved = approve;
     save(user);
   });
