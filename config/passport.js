@@ -34,10 +34,13 @@ passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
     if (err) {
       return done(err, false);
     }
+    function sendNotFound() {
+      return done(null, false);
+    }
     if (user) {
       return done(null, user);
     } else {
-      return done(null, false);
+      return sendNotFound();
       // or you could create a new account
     }
   });

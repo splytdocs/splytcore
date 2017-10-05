@@ -44,7 +44,8 @@
   "devDependencies": {
     "jest": "^20.0.4",
     "jest-cli": "^20.0.4",
-    "jest-mock-express": "^0.1.1"
+    "jest-mock-express": "^0.1.1",
+    "mockingoose": "^2.3.0"
   },
   "engines": {
     "node": "6.1.0"

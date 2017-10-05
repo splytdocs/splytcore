@@ -15,6 +15,14 @@ const deleteSensitiveFields = Scrub.deleteSensitiveFields;
 const _ = require("lodash");
 var Jwt = require("./../app/Jwt");
 
+const AccountCreation = require("./../accounts/AccountCreation");
+const CreateAccountRequest = require("./../accounts/CreateAccountRequest");
+const SingleErrorResponse = require("./../app/SingleErrorResponse");
+const makeError = SingleErrorResponse.InvalidRequestError;
+const validator = CreateAccountRequest.validator;
+const uniqueCode = SingleErrorResponse.codes.unique;
+const canUserBeCreated = AccountCreation.canUserBeCreated;
+
 function scrubUser(user) {
   const copy = Object.assign({}, user);
   return deleteSensitiveFields(
@@ -58,11 +66,11 @@ exports.loginPost = function(req, res, next) {
 
   passport.authenticate('local', (err, user, info)=>{
     if (!user) {
-      return sendValidationError(res, info);
+      return sendValidationError(res, [info]);
     }
     req.logIn(user, function(err) {
       if(err) {
-        return sendValidationError(res, err);
+        return sendValidationError(res, [err]);
       }
       const output = Jwt.makeAndSignUserToken(user);
       return send200(res, output);
@@ -78,15 +86,7 @@ exports.logout = function(req, res) {
   res.redirect('/');
 };
 
-/**
- * POST /signup (POST /users)
- */
 exports.signupPost = function(req, res, next) {
-  const CreateAccountRequest = require("./../accounts/CreateAccountRequest");
-  const SingleErrorResponse = require("./../app/SingleErrorResponse");
-  const makeError = SingleErrorResponse.InvalidRequestError;
-  const validator = CreateAccountRequest.validator;
-  const uniqueCode = SingleErrorResponse.codes.unique;
   
   const input = req.body;
   const errors = validator.validate(input);
@@ -94,10 +94,9 @@ exports.signupPost = function(req, res, next) {
     return sendValidationError(res, errors);
   }
   function createUser() {
-    // Chop off any superfluous fields from the request body
-    const userDoc = _.pick(input, validator.schema.required);
-    
-    User.create(userDoc, (err, made)=>{
+    const doc = Object.assign({}, input);
+
+    AccountCreation.sanitizeAndCreate(User)(doc, (err, made)=>{
       if(err) {
         send500(res, err);
       } else {
@@ -107,34 +106,15 @@ exports.signupPost = function(req, res, next) {
   };
   /* Check if username or e-mail is in use already */
   const username = input.username, email = input.email;
-  const query = User.find({})
-    .select('email username')
-    .or({username})
-    .or({email})
-    .limit(2);
-  query.exec((err, matchingUsers)=>{
-    if(matchingUsers && matchingUsers.length) {
-      const errors = [];
-      if(matchingUsers.find((i)=>i.username==username)) {
-        errors.push(makeError({
-          code:uniqueCode,
-          param:"username",
-          message:"This username is already in use."
-        }));
-      }
-      if(matchingUsers.find((i)=>i.email==email)) {
-        errors.push(makeError({
-          code:uniqueCode,
-          param:"email",
-          message:"This email address is already in use."
-        }));
-      }
-      return sendValidationError(res, errors);
+  const handle = (err, data)=>{
+    if(err) {
+      return sendValidationError(res, err);
     } else {
       return createUser();
     }
     send500(res, null);
-  });
+  };
+  canUserBeCreated()({username, email}, handle);
 };
 exports.accountGet = function(req, res, next) {
   User.findById(req.user.id, (err, user)=>{

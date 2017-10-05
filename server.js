@@ -159,6 +159,7 @@ app.put('/api/ownership',
 
 const Upload = require("./photos/Upload");
 const AWS = require('aws-sdk');
+
 const s3cfg = {
   accessKeyId: process.env.aws_access_key_id,
   secretAccessKey: process.env.aws_secret_access_key,
@@ -183,6 +184,24 @@ app.post('/api/assets/:id/photos',
   uploadMiddleware.array('photos', photoConfig.maxPhotos),
   Upload.controller(associator)
 );
+
+const Demo = require("./demo/DemoControllers");
+const ViaSes = require("./demo/Notifier").ses;
+const awsSes = new AWS.SES({
+  accessKeyId: process.env.aws_access_key_id,
+  secretAccessKey: process.env.aws_secret_access_key,
+  region:process.env.aws_region
+});
+
+
+app.post('/api/demo/accounts/notify', 
+  Demo.notify([ViaSes(awsSes, process.env)])
+);
+app.post('/api/demo/accounts/', 
+  Demo.create([ViaSes(awsSes, process.env)])
+);
+app.get('/api/demo/accounts/approvals',
+  Demo.approve(process.env));
 
 // Production error handler
 if (app.get('env') === 'production') {
