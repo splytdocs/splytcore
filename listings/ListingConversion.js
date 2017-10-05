@@ -31,9 +31,8 @@ function mutateToAssetResponse(asset) {
   return asset;
 }
 
-function inferUri(req, listing) {
-  const baseUri = req.protocol + '://' + req.get('host');
-  return `${baseUri}/api/listings/${listing.id}`;
+function inferUri(req, listing, baseUri=process.env.api_base_uri) {
+  return `${baseUri}api/listings/${listing.id}`;
 };
 module.exports.inferUri = inferUri;
 module.exports.mapWithDistance = (geolib = BackupGeolib) => (to, from) => {
