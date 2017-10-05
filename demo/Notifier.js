@@ -4,12 +4,9 @@ module.exports.generateApprovalUri = (config=process.env)=>(accountCreated)=>{
   const userId = accountCreated._id;
   return `${baseUri}api/accounts/demo/approve?userId=${userId}&secret=${secret}`
 };
-module.exports.ses = (awsSes, config=process.env)=>(accountCreated, callback)=> {
-
-  let sanitized = Object.assign({}, accountCreated);
-  delete sanitized.password;
-  const approvalUri = this.generateApprovalUri()(accountCreated);
-  let message = `
+module.exports.generateMessage = (config=process.env, sanitized) => {
+  const approvalUri = this.generateApprovalUri()(sanitized);
+  return `
   <h2>New Request for Splyt Demo Access</h2>
   <ul>
   <li>Email: ${sanitized.email}</li>
@@ -18,9 +15,14 @@ module.exports.ses = (awsSes, config=process.env)=>(accountCreated, callback)=> 
   <li>Justification: ${sanitized.justification}</li>
   <li>Id: ${sanitized._id}</li>
 
-  <li><a href="${approvalUri}">${approvalUri}</a><li>
+  <li><a href="${approvalUri}">${approvalUri}</a></li>
   </ul>
   `;
+};
+module.exports.ses = (awsSes, config=process.env)=>(accountCreated, callback)=> {
+  let sanitized = Object.assign({}, accountCreated);
+  delete sanitized.password;
+  let message = this.generateMessage(config, accountCreated)
   function send() {
     let to = config.demo_approval_email_to.split(",");
     let from = config.demo_approval_email_from;
@@ -57,7 +59,7 @@ module.exports.ses = (awsSes, config=process.env)=>(accountCreated, callback)=> 
       callback(err, data);
     });
   }
-  console.log(message);
+  //console.log(message);
   send();
 };
 module.exports.notify = (methods=null)=>(accountCreated, collect=true) => {
