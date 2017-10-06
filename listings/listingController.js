@@ -14,7 +14,6 @@ const ListingConversion = require("./ListingConversion");
 const toListingResponse = ListingConversion.toListingResponse();
 const mapWithDistance = ListingConversion.mapWithDistance();
 
-
 var Asset = require("./../models/Asset");
 
 function getUserFromContext(req) {
@@ -34,7 +33,7 @@ function send404ListingNotFound(res, id) {
 exports.search = function(req, res, next) {
   req.assert('latitude', 'latitude cannot be blank').notEmpty();
   req.assert('longitude', 'longitude cannot be blank').notEmpty();
-  
+
   let results;
   let criteria;
   let from = {latitude:0, longitude:0}
@@ -107,8 +106,8 @@ function persistAsset(listingRequest) {
     const document = Object.assign({}, listingRequest.asset);
     document.ownership = {};
     Asset.create(document, (error, object)=>{
-      if(error) { 
-        reject({error: error}); 
+      if(error) {
+        reject({error: error});
       }
       else {
         resolve({data:object})
@@ -120,6 +119,7 @@ exports.create = function(req, res, next) {
   const validator = new clr.AjvCreateListingSchemaValidator();
   const newListing = req.body;
   const validationSummary = validator.validate(newListing);
+
   if(validationSummary.length) {
     sendValidationError(res, validationSummary);
     return;
@@ -134,7 +134,7 @@ exports.create = function(req, res, next) {
   listingRequest.listing.title = newListing.asset.title;
 
   delete listingRequest.listing.asset;
-  
+
   function inlineAsset() {
     const results = persistAsset(listingRequest);
     results.then((data)=> {
@@ -147,12 +147,13 @@ exports.create = function(req, res, next) {
     });
     results.catch((data)=>send500(res, data.error));
   }
-  
+
   function inlineListing(createdAsset) {
     const results = repo.addNew(listingRequest);
     results.then((data)=> {
       if(!data.error && data.data) {
         const output = toListingResponse(data.data, createdAsset, req);
+        // ethereum.deployContracts(createdAsset, data.data);
         res.status(201).json(output);
       } else {
         send500(res, data.error);
@@ -163,6 +164,8 @@ exports.create = function(req, res, next) {
 
   inlineAsset();
 };
+
+
 exports.delete = function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
   // todo: validation

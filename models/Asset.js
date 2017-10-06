@@ -48,11 +48,9 @@ var photosSchema = new mongoose.Schema({
   },
   userId: {
     type: ObjectId,
-    required: false
   },
   tags:{
     type: [String],
-    required: false,
     default:[]
   }
 });
@@ -79,14 +77,12 @@ var assetSchema = new mongoose.Schema({
   photos: [photosSchema],
   mode: {
     type: String,
-    required: false
   },
   rating: {
     type: Number,
     min: 0,
     max: 5,
     default: 0,
-    required: false
   },
   amountFunded: {
     type: Number,
@@ -99,7 +95,6 @@ var assetSchema = new mongoose.Schema({
   },
   cargo: {
     type: Object,
-    required: false
   },
   ownership: ownershipSchema
 }, schemaOptions);
