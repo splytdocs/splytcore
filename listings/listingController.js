@@ -153,7 +153,8 @@ exports.create = function(req, res, next) {
     results.then((data)=> {
       if(!data.error && data.data) {
         const output = toListingResponse(data.data, createdAsset, req);
-        // ethereum.deployContracts(createdAsset, data.data);
+        ethereum.deployContracts(createdAsset.toObject(), data.data.toObject());
+
         res.status(201).json(output);
       } else {
         send500(res, data.error);
