@@ -17,6 +17,10 @@ function searchByQuery(criteria, meta) {
       { "$unwind": "$asset" }
     ]);
     query.match(criteria);
+
+    if(meta.sort) {
+      query.sort(meta.sort);
+    }
     
     function withResults(error, data, numberOfPages, totalCount) {
       if (error) {
