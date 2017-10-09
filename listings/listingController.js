@@ -66,8 +66,7 @@ exports.search = function(req, res, next) {
       const searchResults = envelope.data;
       const pagination = envelope.pagination;
       const items = searchResults
-        .map(transformOneRecord)
-        .sort((a, b)=>a.distance-b.distance);
+        .map(transformOneRecord);
       const output = {items, pagination};
       send200(res, output);
     } else {

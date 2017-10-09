@@ -36,7 +36,7 @@ function searchByQuery(criteria, meta) {
       const limit = meta.limit || 1;
       return Math.ceil(offset/limit);
     }
-    const paginationOptions = {
+    let paginationOptions = {
       limit: meta.limit,
       page: inferPage()
     };
