@@ -10,7 +10,7 @@ describe('CreateListingRequestJsonSchema', () => {
       "properties": {
         "expirationDate": {
           "description": "The date on which this listing should end if not funded.", 
-          "id": "/properties/asset/properties/expirationDate", 
+          "id": "/properties/listing/properties/expirationDate", 
           "title": "Expiration Date", 
           "type": "string",
           "format":"date-time"
@@ -77,6 +77,12 @@ describe('CreateListingRequestJsonSchema', () => {
               "type": "string",
               "enum": ["Buy", "Sell"]
             },
+            "description": {
+              "description": "The text description of this asset.", 
+              "id": "/properties/properties/asset/description", 
+              "title": "Description", 
+              "type": "string"
+            }
           }, 
           "type": "object",
           "required":["term", "termType", "title","cargo", "costBreakdown", "mode"]
@@ -117,6 +123,12 @@ describe('CreateListingRequestJsonSchema', () => {
             }
           }, 
           "type": "object"
+        },
+        "description": {
+          "description": "The text description of this listing.", 
+          "id": "/properties/properties/description", 
+          "title": "Description", 
+          "type": "string"
         }
       }, 
       "type": "object"

@@ -6,7 +6,7 @@ class CreateListingRequestJsonSchema {
       "properties": {
         "expirationDate": {
           "description": "The date on which this listing should end if not funded.", 
-          "id": "/properties/asset/properties/expirationDate", 
+          "id": "/properties/listing/properties/expirationDate", 
           "title": "Expiration Date", 
           "type": "string",
           "format":"date-time"
@@ -32,7 +32,7 @@ class CreateListingRequestJsonSchema {
               "id": "/properties/asset/properties/title", 
               "title": "A title describing this asset.", 
               "type": "string"
-            },
+            }, 
             "cargo": {
               "description": "Specific information about this individual asset not able to be generalized. For instance, a vehicle would have a `cargo` object describing its Year, Make, Model, Trim, etc. Season Tickets may have something like Team, Box, etc.", 
               "id": "/properties/asset/properties/cargo", 
@@ -73,6 +73,12 @@ class CreateListingRequestJsonSchema {
               "type": "string",
               "enum": ["Buy", "Sell"]
             },
+            "description": {
+              "description": "The text description of this asset.", 
+              "id": "/properties/properties/asset/description", 
+              "title": "Description", 
+              "type": "string"
+            }
           }, 
           "type": "object",
           "required":["term", "termType", "title","cargo", "costBreakdown", "mode"]
@@ -113,6 +119,12 @@ class CreateListingRequestJsonSchema {
             }
           }, 
           "type": "object"
+        },
+        "description": {
+          "description": "The text description of this listing.", 
+          "id": "/properties/properties/description", 
+          "title": "Description", 
+          "type": "string"
         }
       }, 
       "type": "object"

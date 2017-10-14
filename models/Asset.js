@@ -96,6 +96,11 @@ var assetSchema = new mongoose.Schema({
   cargo: {
     type: Object,
   },
+  description:{
+    type: String,
+    default: "",
+    required: false
+  },
   ownership: ownershipSchema
 }, schemaOptions);
 
