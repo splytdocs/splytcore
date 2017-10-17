@@ -8,7 +8,7 @@ Downloading geth client:
 
 Creating a wallet:
 
--  Then type ./geth --testnet account new in the terminal to create a new testnet wallet.
+-  Then type ```./geth --testnet account new``` in the terminal to create a new testnet wallet.
 -  Geth client will prompt you to enter password twice to create a wallet.
 -  We'll use Ropsten  which is a private --testnet for testing purposes. (Omit the --testnet flag to sync official chain)
 
