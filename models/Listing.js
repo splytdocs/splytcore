@@ -35,6 +35,12 @@ var locationSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: ""
+  },
+  // For index & distance calculation in Mongo
+  coordinates:{
+    type: [Number],  // [<longitude>, <latitude>]
+    index: '2dsphere',
+    required:false
   }
 });
 var listingSchema = new mongoose.Schema({
@@ -78,6 +84,13 @@ var listingSchema = new mongoose.Schema({
   }
 }, schemaOptions);
 
+function setComputedCoordinates() {
+  //this.location.coordinates = [this.location.longitude, this.location.latitude]
+}
+listingSchema.pre('validate', function (next) {
+  setComputedCoordinates.call(this);
+  next();
+});
 listingSchema.plugin(mongooseAggregatePaginate);
 var Listing = mongoose.model('Listing', listingSchema);
 

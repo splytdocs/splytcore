@@ -6,13 +6,15 @@ const ethereum = require(path.resolve("./controllers/ethereum"));
 const clr = require("./create/AjvCreateListingSchemaValidator");
 const helpers = require("./../app/ResponseHelpers");
 const send500 = helpers.send500,
-      send200 = helpers.send200
+      send200 = helpers.send200,
       send404Message = helpers.send404Message,
-      sendValidationError = helpers.sendValidationError;
+      sendValidationError = helpers.sendValidationError,
+      sendUnauthorized = helpers.sendUnauthorized;
 const ListingSearchParameters = require("./ListingSearchParameters");
 const ListingConversion = require("./ListingConversion");
 const toListingResponse = ListingConversion.toListingResponse();
 const mapWithDistance = ListingConversion.mapWithDistance();
+const SingleErrorResponse = require("./../app/SingleErrorResponse");
 
 var Asset = require("./../models/Asset");
 
@@ -205,4 +207,27 @@ exports.mine = function(req, res, next) {
     }
   });
   results.catch((envelope)=>send500(res, envelope.error));
+};
+
+exports.editListing = (editor) => function(req, res) {
+  const target = req.body;
+  const listingId = req.params.id;
+  target.id = listingId;
+  const userId = req.user.id;
+  const results = editor.edit(target, userId);
+
+  function onFulfilled(data) {
+    send200(res, toListingResponse(data.listing, data.asset));
+    return;
+  };
+  function onRejected(reason) {
+    const errors = reason.errors || reason;
+    let sender = sendValidationError;
+    if(errors.find(i=>i.code==SingleErrorResponse.codes.unauthorized)) {
+      sender = sendUnauthorized;
+    }
+    sender(res, errors);
+    return;
+  }
+  results.then(onFulfilled, onRejected);
 };

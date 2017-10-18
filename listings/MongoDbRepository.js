@@ -124,6 +124,8 @@ function convertListingRequestToDocument(listingRequest) {
   const doc = Object.assign({}, listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;
   doc.assetId = listingRequest.assetId;
+  const location = doc.location;
+  doc.location.coordinates = [location.longitude, location.latitude];
   return doc;
 }
 exports.addNew = function (listingRequest) {
