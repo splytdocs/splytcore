@@ -223,20 +223,13 @@ app.get('/api/demo/accounts/approvals',
   Demo.approve(process.env));
 
 // Production error handler
-if (app.get('env') === 'production') {
-  app.use(function(err, req, res, next) {
-    console.error(err.stack);
-    res.sendStatus(err.status || 500);
-  });
-}
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.sendStatus(err.status || 500);
+});
 
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
-});
-
-process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-  // application specific logging, throwing an error, or other logic here
 });
 
 module.exports = app;
