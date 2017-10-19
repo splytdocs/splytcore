@@ -79,6 +79,7 @@ module.exports.putOwnershipController = (listingRepo, Asset = require("./../mode
 
   Asset.findById(assetId, (err, assetRecord)=>{
     if(err) {return send500(res, err);}
+    if(!assetRecord) { return send404Message(res, "Asset not found") };
     if(assetRecord.ownership == null) {
       assetRecord.ownership = {
         stakes:[]

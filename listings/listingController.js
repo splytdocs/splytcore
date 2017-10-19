@@ -6,13 +6,15 @@ const ethereum = require(path.resolve("./controllers/ethereum"));
 const clr = require("./create/AjvCreateListingSchemaValidator");
 const helpers = require("./../app/ResponseHelpers");
 const send500 = helpers.send500,
-      send200 = helpers.send200
+      send200 = helpers.send200,
       send404Message = helpers.send404Message,
-      sendValidationError = helpers.sendValidationError;
+      sendValidationError = helpers.sendValidationError,
+      sendUnauthorized = helpers.sendUnauthorized;
 const ListingSearchParameters = require("./ListingSearchParameters");
 const ListingConversion = require("./ListingConversion");
 const toListingResponse = ListingConversion.toListingResponse();
 const mapWithDistance = ListingConversion.mapWithDistance();
+const SingleErrorResponse = require("./../app/SingleErrorResponse");
 
 var Asset = require("./../models/Asset");
 
@@ -66,8 +68,7 @@ exports.search = function(req, res, next) {
       const searchResults = envelope.data;
       const pagination = envelope.pagination;
       const items = searchResults
-        .map(transformOneRecord)
-        .sort((a, b)=>a.distance-b.distance);
+        .map(transformOneRecord);
       const output = {items, pagination};
       send200(res, output);
     } else {
@@ -153,8 +154,14 @@ exports.create = function(req, res, next) {
     results.then((data)=> {
       if(!data.error && data.data) {
         const output = toListingResponse(data.data, createdAsset, req);
-        ethereum.deployContracts(createdAsset.toObject(), data.data.toObject());
-
+        try {
+          ethereum.deployContracts(createdAsset.toObject(), data.data.toObject());
+        } catch(error) {
+          send500(res, {
+            message:"Error deploying Ethereum contracts",
+            error
+          });
+        }
         res.status(201).json(output);
       } else {
         send500(res, data.error);
@@ -206,4 +213,27 @@ exports.mine = function(req, res, next) {
     }
   });
   results.catch((envelope)=>send500(res, envelope.error));
+};
+
+exports.editListing = (editor) => function(req, res) {
+  const target = req.body;
+  const listingId = req.params.id;
+  target.id = listingId;
+  const userId = req.user.id;
+  const results = editor.edit(target, userId);
+
+  function onFulfilled(data) {
+    send200(res, toListingResponse(data.listing, data.asset));
+    return;
+  };
+  function onRejected(reason) {
+    const errors = reason.errors || reason;
+    let sender = sendValidationError;
+    if(errors.find(i=>i.code==SingleErrorResponse.codes.unauthorized)) {
+      sender = sendUnauthorized;
+    }
+    sender(res, errors);
+    return;
+  }
+  results.then(onFulfilled, onRejected);
 };

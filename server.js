@@ -15,6 +15,7 @@ var helpers = require("./app/ResponseHelpers");
 var util = require("util");
 
 const AssetRepo = require("./models/Asset");
+const ListingRepo = require("./models/Listing");
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
@@ -156,6 +157,24 @@ app.put('/api/ownership',
   standardTimeout(), haltOnTimedout,
   Ownership.putOwnershipController(listingsRepo));
 
+const ListingEditor = require("./listings/edit/ListingEditor");
+const CreateListingSchema = require("./listings/create/CreateListingRequestJsonSchema").CreateListingRequestJsonSchema;
+const AjvSchemaValidator = require("./app/AjvSchemaValidator").AjvSchemaValidator;
+const AjvCreateListingSchemaValidator = require('./listings/create/AjvCreateListingSchemaValidator').AjvCreateListingSchemaValidator;
+const ethereum = require(path.resolve("./controllers/ethereum"));
+
+const editor = ListingEditor.makeEditor({
+  repo: ListingEditor.makeRepo({
+    AssetModel:AssetRepo,
+    ListingModel:ListingRepo}),
+  schemaValidator: new AjvCreateListingSchemaValidator(),
+  stateValidator: ListingEditor.makeStateValidator(),
+  blockchain: ListingEditor.makeBlockchain(ethereum)
+});
+app.put('/api/listings/:id', 
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout, 
+  listings.editListing(editor));
 
 const Upload = require("./photos/Upload");
 const AWS = require('aws-sdk');
@@ -204,12 +223,10 @@ app.get('/api/demo/accounts/approvals',
   Demo.approve(process.env));
 
 // Production error handler
-if (app.get('env') === 'production') {
-  app.use(function(err, req, res, next) {
-    console.error(err.stack);
-    res.sendStatus(err.status || 500);
-  });
-}
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.sendStatus(err.status || 500);
+});
 
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));

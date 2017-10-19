@@ -9,7 +9,8 @@ class SingleErrorResponse {
   }
 }
 module.exports.codes = {
-  unique:"unique"
+  unique:"unique",
+  unauthorized:"unauthorized"
 };
 module.exports.SingleErrorResponse = SingleErrorResponse;
 module.exports.InvalidRequestError = (document)=>{

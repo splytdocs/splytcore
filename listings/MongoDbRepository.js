@@ -17,6 +17,10 @@ function searchByQuery(criteria, meta) {
       { "$unwind": "$asset" }
     ]);
     query.match(criteria);
+
+    if(meta.sort) {
+      query.sort(meta.sort);
+    }
     
     function withResults(error, data, numberOfPages, totalCount) {
       if (error) {
@@ -32,7 +36,7 @@ function searchByQuery(criteria, meta) {
       const limit = meta.limit || 1;
       return Math.ceil(offset/limit);
     }
-    const paginationOptions = {
+    let paginationOptions = {
       limit: meta.limit,
       page: inferPage()
     };
@@ -120,6 +124,8 @@ function convertListingRequestToDocument(listingRequest) {
   const doc = Object.assign({}, listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;
   doc.assetId = listingRequest.assetId;
+  const location = doc.location;
+  doc.location.coordinates = [location.longitude, location.latitude];
   return doc;
 }
 exports.addNew = function (listingRequest) {
