@@ -51,11 +51,16 @@ exports.deployContracts = function deployContracts(asset, listing) {
       console.log(trxHash)
     }
   })
-  .on('receipt', function(receipt){
-    console.log(receipt.contractAddress);
+  .then(function(newContractInstance) {
+    console.log('Contract address: ',newContractInstance.options.address);
     listing.assetAddress = receipt.contractAddress;
     createListing(listing);
-  })
+  });
+  // .on('receipt', function(receipt){
+  //   console.log(receipt.contractAddress);
+  //   listing.assetAddress = receipt.contractAddress;
+  //   createListing(listing);
+  // })
 }
 
 // Will create listing contract
@@ -78,15 +83,30 @@ function createListing(listing) {
     }
   })
   .on('receipt', function(receipt){
-    console.log(receipt.contractAddress);
-    listing.assetAddress = receipt.contractAddress;
-    createListing(listing);
+    console.log(receipt.contractAddress)
+    listing.assetAddress = receipt.contractAddress
+    createListing(listing)
   })
 }
 
 // Will update tracker with addresses
 function addToTracker() {
-  console.log('now updating tracker contract');
+  console.log('now updating tracker contract')
+}
+
+exports.createWallet = function () {
+  // static password for now. will need to tie in user's password later. if we do consider tying reset password or forgot password.
+  return web3.eth.personal.newAccount('splytcore2017')
+}
+
+exports.getWalletBalance = function (address, cb) {
+  web3.eth.getBalance(address, (err, balance) => {
+    if(err) {
+      cb(err, null)
+    } else {
+      cb(null, web3.utils.fromWei(balance, 'szabo'))
+    }
+  })
 }
 
 exports.createListing = createListing;

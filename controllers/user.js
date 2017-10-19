@@ -14,6 +14,7 @@ const standardMongoScrub = Scrub.standardMongoScrub;
 const deleteSensitiveFields = Scrub.deleteSensitiveFields;
 const _ = require("lodash");
 var Jwt = require("./../app/Jwt");
+const Ethereum = require("./ethereum.js");
 
 const AccountCreation = require("./../accounts/AccountCreation");
 const CreateAccountRequest = require("./../accounts/CreateAccountRequest");
@@ -87,7 +88,7 @@ exports.logout = function(req, res) {
 };
 
 exports.signupPost = function(req, res, next) {
-  
+
   const input = req.body;
   const errors = validator.validate(input);
   if (errors.length > 0) {
@@ -95,13 +96,16 @@ exports.signupPost = function(req, res, next) {
   }
   function createUser() {
     const doc = Object.assign({}, input);
-
-    AccountCreation.sanitizeAndCreate(User)(doc, (err, made)=>{
-      if(err) {
-        send500(res, err);
-      } else {
-        send200(res, scrubUser(made));
-      }
+    Ethereum.createWallet()
+    .then(function(address) {
+      doc.walletAddress = address;
+      AccountCreation.sanitizeAndCreate(User)(doc, (err, made)=>{
+        if(err) {
+          send500(res, err);
+        } else {
+          send200(res, scrubUser(made));
+        }
+      });
     });
   };
   /* Check if username or e-mail is in use already */
@@ -116,12 +120,16 @@ exports.signupPost = function(req, res, next) {
   };
   canUserBeCreated()({username, email}, handle);
 };
+
 exports.accountGet = function(req, res, next) {
   User.findById(req.user.id, (err, user)=>{
     if(err) {
       return sendValidationError(res, [{message:"Something bad happened"}]);
     }
-    return send200(res, scrubUser(user));
+    user.walletBalance = Ethereum.getWalletBalance(user.walletAddress, (err, balance) => {
+      user.walletBalance = balance;
+      return send200(res, scrubUser(user));
+    })
   });
 }
 /**
@@ -199,7 +207,7 @@ exports.unlink = function(req, res, next) {
         break;
       case 'github':
           user.github = undefined;
-        break;      
+        break;
       default:
         req.flash('error', { msg: 'Invalid OAuth Provider' });
         return res.redirect('/account');

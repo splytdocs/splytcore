@@ -19,6 +19,8 @@ var userSchema = new mongoose.Schema({
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  walletAddress: String,
+  walletBalance: Number,
   gender: String,
   location: String,
   website: String,
