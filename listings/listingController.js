@@ -176,7 +176,7 @@ exports.create = function(req, res, next) {
 };
 
 
-exports.delete = (deactivator=ListingDeactivator, blockchain=ethereum) => async function(req, res, next) {
+exports.delete = (deactivator=ListingDeactivator, blockchain=ethereum) => function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
   // todo: validation
   // todo: require application/json

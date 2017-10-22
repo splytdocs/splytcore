@@ -1,4 +1,4 @@
-module.exports.deactivateExpiredListings = (ListingDeactivator, ListingModel, blockchain) => async (req, res, next) => {
+module.exports.deactivateExpiredListings = (ListingDeactivator, ListingModel, blockchain) => (req, res, next) => {
   throw 'Not yet finished'
   const expiredListings = ListingDeactivator
     .findActiveExpiredListingsInStore(ListingModel)();
