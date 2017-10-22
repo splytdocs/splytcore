@@ -16,7 +16,9 @@ const toListingResponse = ListingConversion.toListingResponse();
 const mapWithDistance = ListingConversion.mapWithDistance();
 const SingleErrorResponse = require("./../app/SingleErrorResponse");
 
-var Asset = require("./../models/Asset");
+const Asset = require("./../models/Asset");
+const Listing = require("./../models/Listing");
+const ListingDeactivator = require("./deactivate/ListingDeactivator");
 
 function getUserFromContext(req) {
   /* Be sure you're authenticated, otherwise this won't be here */
@@ -174,24 +176,36 @@ exports.create = function(req, res, next) {
 };
 
 
-exports.delete = function(req, res, next) {
+exports.delete = (deactivator=ListingDeactivator, blockchain=ethereum) => async function(req, res, next) {
   req.assert('id', 'id cannot be blank').notEmpty();
   // todo: validation
   // todo: require application/json
   // todo: Ensure that user deleting this actually owns the listing
+  const onPromiseRejection = (error)=> {
+    send500(res, error);
+  };
   const id = req.params.id;
-  const results = repo.deactivate(id);
-  results.then((envelope)=> {
-    if(!envelope.error && envelope.data) {
-      const output = toListingResponse(envelope.data, null, req);
+  const findDocuments = ()=>{
+    return new Promise((resolve, reject)=>{
+      Listing.findById(id).then((listingDocument) => {
+        Asset.findById(listingDocument.assetId)
+          .then((assetDocument) => {
+            resolve({listing:listingDocument, asset:assetDocument})
+          }, reject);
+      }, reject);
+    });
+  }
+  function triggerDeactivation(documents) {
+    const results = deactivator
+      .deactivateOnBlockchainAndStore(blockchain, Listing)(documents);
+      
+    results.then((data)=> {
+      const output = toListingResponse(data.documents.listing, data.documents.asset, req);
       send200(res, output);
-    } else {
-      send404ListingNotFound(res, id);
-    }
-  });
-  results.catch((data)=>{
-    handleCommonListingError(res, id, data);
-  });
+    }, onPromiseRejection);
+  }
+  findDocuments()
+    .then(triggerDeactivation, onPromiseRejection);
 };
 
 exports.mine = function(req, res, next) {

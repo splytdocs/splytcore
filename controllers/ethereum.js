@@ -109,5 +109,15 @@ exports.getWalletBalance = function (address, cb) {
   })
 }
 
+function deactivate({listing, asset}) {
+  return new Promise((resolve, reject)=>{
+    console.log("ethereum deactivate:", arguments);
+    const results = {};
+    // todo: do something
+    resolve(results);
+  });
+}
+
 exports.createListing = createListing;
 exports.addToTracker = addToTracker;
+exports.deactivate = deactivate;

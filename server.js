@@ -147,7 +147,7 @@ app.get('/api/listings/:id',
 app.delete('/api/listings/:id',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout, 
-  listings.delete);
+  listings.delete());
 app.get('/api/ownership',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
