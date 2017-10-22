@@ -52,8 +52,9 @@ exports.deployContracts = function deployContracts(asset, listing) {
     }
   })
   .then(function(newContractInstance) {
-    console.log('Contract address: ',newContractInstance.options.address);
-    listing.assetAddress = receipt.contractAddress;
+    const contractAddress = newContractInstance.options.address;
+    console.log('Contract address: ',contractAddress);
+    listing.assetAddress = contractAddress;
     createListing(listing);
   });
   // .on('receipt', function(receipt){
