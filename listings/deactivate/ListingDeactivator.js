@@ -29,17 +29,7 @@ module.exports.deactivateOnBlockchainAndStore = (blockchain, ListingModel) => (d
     blockchainDeactivate();
   });
 };
-module.exports.expireOnBlockchainAndStore = (blockchain, ListingModel) => (documents={listing, asset}, additionalChanges={isExpired:true}) => {
-  // Handler for routine cleanup of listings that have expired without being fully funded
-  return this.deactivateOnBlockchainAndStore(blockchain, ListingModel)
-    (documents, additionalChanges);
-};
 module.exports.manuallyUnlistOnBlockchainAndStore = (blockchain, ListingModel) => (documents={listing, asset}, additionalChanges={wasManuallyUnlisted:true}) => {
   // Handler for when the Lister decides to manually end the listing
   return this.deactivateOnBlockchainAndStore(blockchain, ListingModel)(documents, additionalChanges);
-};
-module.exports.findActiveExpiredListingsInStore = (ListingModel, thresholdDate=new Date()) => () => {
-  return ListingModel.query({
-    isActive: true, expirationDate:{$gt:thresholdDate}
-  }).exec();
 };

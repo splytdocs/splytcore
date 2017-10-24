@@ -176,9 +176,15 @@ app.put('/api/listings/:id',
   standardTimeout(), haltOnTimedout, 
   listings.editListing(editor));
 
+/*
+app.get('/api/_temp/expirejob',
+  standardTimeout(), haltOnTimedout, 
+  listings.makeExpirerController(expirer)
+);
+*/
+
 const Upload = require("./photos/Upload");
 const AWS = require('aws-sdk');
-
 const s3cfg = {
   accessKeyId: process.env.aws_access_key_id,
   secretAccessKey: process.env.aws_secret_access_key,

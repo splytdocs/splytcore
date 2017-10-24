@@ -251,3 +251,42 @@ exports.editListing = (editor) => function(req, res) {
   }
   results.then(onFulfilled, onRejected);
 };
+
+exports.makeExpirerController = (expirer) => (req, res, next) => {
+  expirer.findActiveExpiredListingsInStore()
+    .then(onFound, onError);
+  function onFound(searchResults) {
+    if(!searchResults || !searchResults.length) {
+      return send200(res, {
+        message:"No expired records to process"
+      });
+    }
+
+    const mapped = searchResults;
+    expirer.markExpired(mapped)
+      .then(onSuccessfulExpiration, onFailedExpiration);
+  }
+  function onError(error) {
+    send500(res, error);
+  }
+  function onSuccessfulExpiration(successes) {
+    if(successes==null) successes=[];
+    const getid=(i)=>{
+      const listing = i.documents.listing;
+      if(listing.id) return listing.id;
+      if(listing._id) return listing._id;
+      return "???";
+    }
+    const out = {
+      success:true,
+      succeeded:successes.map(getid),
+      failed:[]
+    };
+    console.log("Expire job successful result", out);
+    send200(res, out);
+  }
+  function onFailedExpiration(results) {
+    console.warn("Expire job failed result", results);
+    send500(res, results);
+  }
+};
