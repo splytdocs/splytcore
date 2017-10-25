@@ -231,6 +231,8 @@ app.get('/api/demo/accounts/approvals',
 // todo: remove it
 app.get('/api/demo/accounts/approve',
   Demo.approve(process.env));
+app.get('/api/accounts/demo/approve',
+  Demo.approve(process.env));
 
 // Production error handler
 app.use(function(err, req, res, next) {

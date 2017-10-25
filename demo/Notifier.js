@@ -2,7 +2,7 @@ module.exports.generateApprovalUri = (config=process.env)=>(accountCreated)=>{
   let baseUri = config.api_base_uri;
   const secret = config.demo_approval_secret_key;
   const userId = accountCreated._id;
-  return `${baseUri}api/accounts/demo/approvals?userId=${userId}&secret=${secret}`
+  return `${baseUri}api/demo/accounts/approvals?userId=${userId}&secret=${secret}`
 };
 module.exports.generateMessage = (config=process.env, sanitized) => {
   const approvalUri = this.generateApprovalUri()(sanitized);
