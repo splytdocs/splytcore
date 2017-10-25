@@ -227,6 +227,10 @@ app.post('/api/demo/accounts/',
 );
 app.get('/api/demo/accounts/approvals',
   Demo.approve(process.env));
+// temporary double route to handle a few messed up entries
+// todo: remove it
+app.get('/api/demo/accounts/approve',
+  Demo.approve(process.env));
 
 // Production error handler
 app.use(function(err, req, res, next) {
