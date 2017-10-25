@@ -42,16 +42,19 @@ exports.search = function(req, res, next) {
   let criteria;
   let from = {latitude:0, longitude:0}
   if(req.method == "GET") {
-    criteria = ListingSearchParameters.build(req.query);
-    from = {
-      latitude: criteria.latitude,
-      longitude:criteria.longitude
-    };
-    results = repo.search(criteria);
+    send400(res, {
+      message:"The GET version has been obsoleted, use POST."
+  });
   } else {
     var criteria2 = Object.assign({}, req.body);
     const meta = Object.assign({}, criteria2.meta);
     delete criteria2.meta;
+    // default to only showing active listings
+    if(criteria2.match) {
+      if(criteria2.match["isActive"] === undefined) {
+        criteria2.match.isActive = true;
+      }
+    }
     from = {
       latitude: req.query.latitude,
       longitude:req.query.longitude

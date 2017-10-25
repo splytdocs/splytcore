@@ -38,25 +38,13 @@ function searchByQuery(criteria, meta) {
     }
     let paginationOptions = {
       limit: meta.limit,
-      page: inferPage()
+      page:inferPage()
     };
     Listing.aggregatePaginate(query, paginationOptions, withResults);
+    
   });
 };
-exports.search = function (criteria) {
-  let x = criteria.includeDeactivated? {} : {isActive: true};
-  let y = Object.assign({}, x, criteria);
-  delete y.limit;
-  delete y.offset;
-  delete y.includeDeactivated;
-  delete y.latitude;
-  delete y.longitude;
 
-  return searchByQuery(y, {
-    limit:y.limit,
-    offset:y.offset
-  });
-};
 exports.searchByQuery = searchByQuery;
 exports.findById = function (id) {
   return new Promise((resolve, reject) => {
