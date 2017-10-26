@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.Schema.Types.ObjectId;
+var fundedStatus = require("./../listings/OwnershipStatuses").makeStatuses().funded;
 
 var schemaOptions = {
   timestamps: true,
@@ -101,11 +102,23 @@ var assetSchema = new mongoose.Schema({
     default: "",
     required: false
   },
+  totalCost:{
+    type: Number,
+    default:0,
+    required:false
+  },
+  costPerDay:{
+    type: Number,
+    default:0,
+    required:false
+  },
   ownership: ownershipSchema
 }, schemaOptions);
 
 assetSchema.pre('save', function (next) {
   recalculateAmountFunded.call(this);
+  recalculateTotalCost.call(this);
+  closeUponFundingAchieved.call(this);
   next();
 });
 
@@ -124,7 +137,30 @@ function recalculateAmountFunded() {
   const amountFunded = recalculateStakes(record);
   record.amountFunded = amountFunded;
 }
+function recalculateTotalCost() {
+  const record = this;
+  let newAmount = 0;
+  if(!record.costBreakdown) {
+    newAmount = 0;
+  } else {
+    let total = 0;
+    record.costBreakdown.toObject()
+      .forEach(i=>total+=i.amount);
+    newAmount = total;
+  }
+  record.totalCost = newAmount;
+  record.costPerDay = (newAmount/365);
+}
+function closeUponFundingAchieved() {
+  const record = this;
+  if(record.amountFunded >= record.totalCost) {
+    record.ownership.status = "FUNDED";
+    record.emit("funded", {asset:record});
+  }
+}
 assetSchema.recalculateAmountFunded = recalculateAmountFunded;
+assetSchema.recalculateTotalCost = recalculateTotalCost;
+assetSchema.closeUponFundingAchieved = closeUponFundingAchieved;
 
 var Asset = mongoose.model('Asset', assetSchema);
 module.exports = Asset;

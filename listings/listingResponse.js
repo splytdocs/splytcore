@@ -10,7 +10,6 @@ class ListingResponse {
       assetId:"",
       title: "",
     }
-    this.contributionTotal = 0;
     this.isActive = false;
     this.dateListed = "";
     this.listedByUserId = "";

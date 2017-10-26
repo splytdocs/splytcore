@@ -148,6 +148,15 @@ app.delete('/api/listings/:id',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout, 
   listings.delete());
+
+const ListingEditor = require("./listings/edit/ListingEditor");
+const CreateListingSchema = require("./listings/create/CreateListingRequestJsonSchema").CreateListingRequestJsonSchema;
+const AjvSchemaValidator = require("./app/AjvSchemaValidator").AjvSchemaValidator;
+const AjvCreateListingSchemaValidator = require('./listings/create/AjvCreateListingSchemaValidator').AjvCreateListingSchemaValidator;
+const ethereum = require(path.resolve("./controllers/ethereum"));
+const ListingDeactivator = require("./listings/deactivate/ListingDeactivator");
+const deactivator = ListingDeactivator.deactivateOnBlockchainAndStore(ethereum, ListingRepo);
+
 app.get('/api/ownership',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
@@ -155,13 +164,7 @@ app.get('/api/ownership',
 app.put('/api/ownership',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
-  Ownership.putOwnershipController(listingsRepo));
-
-const ListingEditor = require("./listings/edit/ListingEditor");
-const CreateListingSchema = require("./listings/create/CreateListingRequestJsonSchema").CreateListingRequestJsonSchema;
-const AjvSchemaValidator = require("./app/AjvSchemaValidator").AjvSchemaValidator;
-const AjvCreateListingSchemaValidator = require('./listings/create/AjvCreateListingSchemaValidator').AjvCreateListingSchemaValidator;
-const ethereum = require(path.resolve("./controllers/ethereum"));
+  Ownership.putOwnershipController({listingsRepo, Asset:AssetRepo, deactivator}));
 
 const editor = ListingEditor.makeEditor({
   repo: ListingEditor.makeRepo({

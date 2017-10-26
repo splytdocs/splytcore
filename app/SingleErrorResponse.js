@@ -10,10 +10,11 @@ class SingleErrorResponse {
 }
 module.exports.codes = {
   unique:"unique",
-  unauthorized:"unauthorized"
+  unauthorized:"unauthorized",
+  notOpenForFunding:"not_open_for_funding",
 };
 module.exports.SingleErrorResponse = SingleErrorResponse;
-module.exports.InvalidRequestError = (document)=>{
+module.exports.InvalidRequestError = (document={code, param, type, message})=>{
   return new SingleErrorResponse(Object.assign({}, document, {
     type:"invalid_request_error"
   }));
