@@ -242,6 +242,10 @@ app.use(function(err, req, res, next) {
   console.error(err.stack);
   res.sendStatus(err.status || 500);
 });
+const raygun = require("./app/logging/raygun");
+const rollbar = require("./app/logging/rollbar");
+raygun.register(app);
+rollbar.register(app);
 
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
