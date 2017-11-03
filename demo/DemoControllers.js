@@ -17,6 +17,7 @@ const send500 = helpers.send500,
 const Scrub = require("./../app/Scrub");
 const standardMongoScrub = Scrub.standardMongoScrub;
 const deleteSensitiveFields = Scrub.deleteSensitiveFields;
+const Ethereum = require("./../controllers/ethereum.js");
 
 function scrubUser(user) {
   const copy = Object.assign({}, user);
@@ -26,20 +27,27 @@ function scrubUser(user) {
 }
 
 function createDemoAccount(doc, callback) {
-  AccountCreation.sanitizeAndCreate(User)({
-    username:doc.email,
-    email:doc.email,
-    password:doc.password,
-    hasBeenApproved:false,
-    justification:doc.justification,
-    representing:doc.representing,
-    demo:true,
-    address:doc.address||"2800 E Observatory Rd, Los Angeles, CA 90027",
-    phone:doc.phone||"(999) 555-5555",
-    name:doc.name
-  }, (err, data)=>{
-    callback(err, data);
-  });
+  function write(walletAddress) {
+    AccountCreation.sanitizeAndCreate(User)({
+      username:doc.email,
+      email:doc.email,
+      password:doc.password,
+      hasBeenApproved:false,
+      justification:doc.justification,
+      representing:doc.representing,
+      demo:true,
+      address:doc.address||"2800 E Observatory Rd, Los Angeles, CA 90027",
+      phone:doc.phone||"(999) 555-5555",
+      name:doc.name,
+      walletAddress:walletAddress
+    }, (err, data)=>{
+      callback(err, data);
+    });
+  }
+  Ethereum.createWallet()
+  .then(function(address) {
+    write(address);
+  }, callback);
   
 }
 module.exports.notify = (methods=null)=> function(req, res) {

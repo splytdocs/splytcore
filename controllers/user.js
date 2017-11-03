@@ -126,10 +126,18 @@ exports.accountGet = function(req, res, next) {
     if(err) {
       return sendValidationError(res, [{message:"Something bad happened"}]);
     }
-    user.walletBalance = Ethereum.getWalletBalance(user.walletAddress, (err, balance) => {
-      user.walletBalance = balance;
-      return send200(res, scrubUser(user));
-    })
+    if(!user.walletAddress) {
+      Ethereum.createWallet().then(function(address) {
+        user.walletAddress = address;
+        user.save();
+        return send200(res, scrubUser(user));
+      }, (err)=> { send500(res, err); });
+    } else {
+      Ethereum.getWalletBalance(user.walletAddress, (err2, balance) => {
+        user.walletBalance = balance;
+        return send200(res, scrubUser(user));
+      });
+    }
   });
 }
 /**
