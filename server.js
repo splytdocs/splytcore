@@ -103,7 +103,9 @@ app.get('/api/accounts',
 //app.put('/api/accounts', requireJwtAuthentication(), userCont.accountPut);
 //app.delete('/api/accounts', userCont.ensureAuthenticated, userCont.accountDelete);
 //app.get('/signup', userCont.signupGet);
-app.post('/api/accounts', userCont.signupPost);
+app.post('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  userCont.signupPost);
 
 //app.get('/api/login', userCont.loginGet);
 app.post('/api/accounts/login', 
