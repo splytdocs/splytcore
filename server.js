@@ -38,6 +38,11 @@ const redirectPostSocial = (req, res)=>{
   res.redirect(postSocialLogin(output.token));
 };
 
+var standardTimeout = function() { return timeout('10s'); }
+function haltOnTimedout (req, res, next) {
+  if (!req.timedout) next()
+}
+
 // Controllers
 var HomeCont = require('./controllers/home');
 var userCont = require('./controllers/user');
@@ -91,14 +96,19 @@ function requireJwtAuthentication() {
 app.get('/', HomeCont.index);
 //app.get('/contact', contactCont.contactGet);
 //app.post('/contact', contactCont.contactPost);
-app.get('/api/accounts', requireJwtAuthentication(), userCont.accountGet);
+app.get('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  requireJwtAuthentication(), 
+  userCont.accountGet);
 //app.put('/api/accounts', requireJwtAuthentication(), userCont.accountPut);
 //app.delete('/api/accounts', userCont.ensureAuthenticated, userCont.accountDelete);
 //app.get('/signup', userCont.signupGet);
 app.post('/api/accounts', userCont.signupPost);
 
 //app.get('/api/login', userCont.loginGet);
-app.post('/api/accounts/login', userCont.loginPost);
+app.post('/api/accounts/login', 
+  standardTimeout(), haltOnTimedout,
+  userCont.loginPost);
 //app.get('/forgot', userCont.forgotGet);
 //app.post('/forgot', userCont.forgotPost);
 //app.get('/reset/:token', userCont.resetGet);
@@ -121,11 +131,6 @@ app.get('/api/accounts/auth/twitter/callback',
 //todo: improve this
 var listings = require('./listings/listingController');
 const Ownership = require('./listings/Ownership');
-var standardTimeout = function() { return timeout('10s'); }
-function haltOnTimedout (req, res, next) {
-  if (!req.timedout) next()
-}
-
 const listingsRepo = require("./listings/contextualListingRepoService").choose();
 app.post('/api/listings/', 
   requireJwtAuthentication(),
@@ -251,4 +256,8 @@ app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+process.on('unhandledRejection', function(reason, p){
+  console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+  // application specific logging here
+});
 module.exports = app;
