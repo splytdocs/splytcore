@@ -120,6 +120,12 @@ describe('CreateListingRequestJsonSchema', () => {
               "id": "/properties/location/properties/zip", 
               "title": "Zip", 
               "type": "string"
+            },
+            "country": {
+              "description": "The user's country.",
+              "id": "/properties/location/properties/country",
+              "title": "Country",
+              "type": "string"
             }
           }, 
           "type": "object"

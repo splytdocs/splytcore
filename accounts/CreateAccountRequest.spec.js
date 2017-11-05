@@ -8,7 +8,8 @@ describe('validate', () => {
       "password":"abcdefg",
       "name":"Fake Person",
       "address":"2 Sunset Blvd, Los Angeles, CA",
-      "phone":"(123) 456-7890"
+      "phone":"(123) 456-7890",
+      "country":"United States"
     };
   };
   describe('holistic', () => {
@@ -112,6 +113,14 @@ describe('validate', () => {
         type:"invalid_request_error",
         message:"should have required property 'phone'"
       });
+    });
+  });
+  describe('country', () => {
+    it('should not be required', () => {
+      const input = validSample();
+      delete input.country;
+      const results = validator.validate(input);
+      expect(results.length).toEqual(0);
     });
   });
 });

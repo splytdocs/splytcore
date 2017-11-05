@@ -16,6 +16,10 @@ var userSchema = new mongoose.Schema({
   address: String,
   phone: String,
   city: String,
+  country: {
+    type: String, 
+    default: "United States"
+  },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,

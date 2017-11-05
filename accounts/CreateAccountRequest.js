@@ -43,6 +43,13 @@ const schema = {
       "title": "Phone",
       "type": "string"
     },
+    "country": {
+      "description": "The user's country.",
+      "id": "/properties/country",
+      "title": "Country",
+      "type": "string"
+    }
+    
   },
   "type": "object"
 };

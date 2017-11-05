@@ -39,6 +39,7 @@ function createDemoAccount(doc, callback) {
       address:doc.address||"2800 E Observatory Rd, Los Angeles, CA 90027",
       phone:doc.phone||"(999) 555-5555",
       name:doc.name,
+      country:doc.country,
       walletAddress:walletAddress
     }, (err, data)=>{
       callback(err, data);

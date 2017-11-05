@@ -41,7 +41,12 @@ var locationSchema = new mongoose.Schema({
     type: [Number],  // [<longitude>, <latitude>]
     index: '2dsphere',
     required:false
-  }
+  },
+  country: {
+    type: String, 
+    default: "United States",
+    required: false
+  },
 });
 var listingSchema = new mongoose.Schema({
   title: {

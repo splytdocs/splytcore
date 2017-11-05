@@ -244,6 +244,11 @@ app.get('/api/demo/accounts/approve',
 app.get('/api/accounts/demo/approve',
   Demo.approve(process.env));
 
+const countries = require("./controllers/country");
+app.get('/api/countries', 
+  standardTimeout(), haltOnTimedout,
+  countries.getAllCountries);
+
 // Production error handler
 app.use(function(err, req, res, next) {
   console.error(err.stack);
