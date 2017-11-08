@@ -164,7 +164,7 @@ exports.create = function(req, res, next) {
         try {
           ethereum.deployContracts(createdAsset.toObject(), data.data.toObject());
         } catch(error) {
-          send500(res, {
+          return send500(res, {
             message:"Error deploying Ethereum contracts",
             error
           });
@@ -203,7 +203,7 @@ exports.delete = (deactivator=ListingDeactivator, blockchain=ethereum) => functi
   function triggerDeactivation(documents) {
     const results = deactivator
       .deactivateOnBlockchainAndStore(blockchain, Listing)(documents);
-      
+
     results.then((data)=> {
       const output = toListingResponse(data.documents.listing, data.documents.asset, req);
       send200(res, output);

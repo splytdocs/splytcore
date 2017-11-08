@@ -97,7 +97,13 @@ exports.signupPost = function(req, res, next) {
   function createUser() {
     const doc = Object.assign({}, input);
     Ethereum.createWallet()
-    .then(function(address) {
+    .then(address => {
+      // send $$ to wallet
+      Ethereum.sendEther(address, (err, txHash) => {
+        return address
+      })
+    })
+    .then( (address) => {
       doc.walletAddress = address;
       AccountCreation.sanitizeAndCreate(User)(doc, (err, made)=>{
         if(err) {
@@ -106,7 +112,7 @@ exports.signupPost = function(req, res, next) {
           send200(res, scrubUser(made));
         }
       });
-    });
+    })
   };
   /* Check if username or e-mail is in use already */
   const username = input.username, email = input.email;
@@ -127,7 +133,8 @@ exports.accountGet = function(req, res, next) {
       return sendValidationError(res, [{message:"Something bad happened"}]);
     }
     if(!user.walletAddress) {
-      Ethereum.createWallet().then(function(address) {
+      Ethereum.createWallet()
+      .then(function(address) {
         user.walletAddress = address;
         user.save();
         return send200(res, scrubUser(user));
