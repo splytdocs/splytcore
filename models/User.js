@@ -20,6 +20,10 @@ var userSchema = new mongoose.Schema({
     type: String, 
     default: "United States"
   },
+  numberOfFundedAssets:{
+    type: Number,
+    default: 0
+  },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,

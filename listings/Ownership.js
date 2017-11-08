@@ -12,6 +12,7 @@ const Asset = require("./../models/Asset");
 const Listing = require("./../models/Listing");
 const statuses = require("./OwnershipStatuses").makeStatuses();
 const SingleErrorResponse = require("./../app/SingleErrorResponse");
+const User = require("./../models/User");
 
 function makeCriteria(userId) {
   return searchCriteriaBuilder({
@@ -72,9 +73,17 @@ function updateStake(res, Asset, {assetRecord, usersStake, userId, amount}){
   usersStake.amount = amount;
   persistAssetAndRespond(res, assetRecord);
 }
+function reaggregateSellerNumberOfFundedAssets(listing) {
+  User.findById(listing.listedByUserId, (error, user)=> {
+    if(!user) return;
+    user.numberOfFundedAssets = user.numberOfFundedAssets + 1;
+    user.save();
+  });
+}
 function handleAfterFundingReached(deactivator, asset) {
   const deactivateListing = (listing) => {
     deactivator({listing,asset})
+    reaggregateSellerNumberOfFundedAssets(listing);
   };
   const logFailure = (error) => {
     console.warn("Unable to find associated listing to deactivate", error, asset._id);
