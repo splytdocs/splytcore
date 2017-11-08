@@ -138,6 +138,10 @@ app.post('/api/listings/',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
   listings.create);
+app.get('/api/listings/mine/funded',
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout,
+  listings.mineFunded);
 app.get('/api/listings/mine',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,

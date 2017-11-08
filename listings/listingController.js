@@ -20,6 +20,8 @@ const Asset = require("./../models/Asset");
 const Listing = require("./../models/Listing");
 const ListingDeactivator = require("./deactivate/ListingDeactivator");
 
+const statuses = require("./OwnershipStatuses").makeStatuses();
+
 function getUserFromContext(req) {
   /* Be sure you're authenticated, otherwise this won't be here */
   if(!req.user) throw 'req.user not found'
@@ -211,11 +213,14 @@ exports.delete = (deactivator=ListingDeactivator, blockchain=ethereum) => functi
     .then(triggerDeactivation, onPromiseRejection);
 };
 
-exports.mine = function(req, res, next) {
+function handleMine(req, res, next, withCriteria) {
   const userId = req.user.id;
   const criteria = {
     "listedByUserId": new mongoose.Types.ObjectId(userId)
   };
+  if(withCriteria) {
+    withCriteria(criteria);
+  }
   const results = repo.searchByQuery(criteria);
   results.then((envelope)=> {
     if(!envelope.error) {
@@ -230,6 +235,15 @@ exports.mine = function(req, res, next) {
     }
   });
   results.catch((envelope)=>send500(res, envelope.error));
+}
+
+exports.mine = function(req, res, next) {
+  handleMine(req, res, next);
+};
+exports.mineFunded = function(req, res, next) {
+  handleMine(req, res, next, (criteria)=> {
+    criteria["asset.ownership.status"] = statuses.funded;
+  });
 };
 
 exports.editListing = (editor) => function(req, res) {
