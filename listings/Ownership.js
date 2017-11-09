@@ -64,14 +64,26 @@ function persistAssetAndRespond(res, assetRecord) {
   });
 }
 function createStake(res, Asset, {assetRecord, userId, amount}) {
-  assetRecord.ownership.stakes.push({
-    userId, amount
-  });
-  persistAssetAndRespond(res, assetRecord);
+  User.findById(userId, (err, user)=> {
+    if(err) return send500(res, err);
+    assetRecord.ownership.stakes.push({
+      userId, amount,
+      shipTo:{
+        country:user.country
+      }
+    });
+    persistAssetAndRespond(res, assetRecord);
+  })
 }
 function updateStake(res, Asset, {assetRecord, usersStake, userId, amount}){
-  usersStake.amount = amount;
-  persistAssetAndRespond(res, assetRecord);
+  User.findById(userId, (err, user)=> {
+    if(err) return send500(res, err);
+    usersStake.amount = amount;
+    usersStake.shipTo = {
+      country:user.country
+    };
+    persistAssetAndRespond(res, assetRecord);
+  });
 }
 function reaggregateSellerNumberOfFundedAssets(listing) {
   User.findById(listing.listedByUserId, (error, user)=> {
@@ -117,6 +129,15 @@ module.exports.putOwnershipController = ({listingRepo, Asset = require("./../mod
         message: "This asset is not open for funding."
       })
       return sendValidationError(res, [err]);
+    }
+    if(!assetRecord.isFractional) {
+      if(amount != assetRecord.totalCost) {
+        const err = SingleErrorResponse.InvalidRequestError({
+          code: SingleErrorResponse.codes.mustFundFully,
+          message: `Non-fractional assets must be fully funded by one party. (${amount} of total: ${assetRecord.totalCost})`
+        });
+        return sendValidationError(res, [err]);
+      }
     }
     let usersStake = assetRecord.ownership.stakes
       .find(i=>i.userId==userId);

@@ -106,6 +106,10 @@ app.get('/api/accounts',
 app.post('/api/accounts', 
   standardTimeout(), haltOnTimedout,
   userCont.signupPost);
+app.patch('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  requireJwtAuthentication(), 
+  userCont.accountPatch);
 
 //app.get('/api/login', userCont.loginGet);
 app.post('/api/accounts/login', 
