@@ -42,8 +42,9 @@ var userSchema = new mongoose.Schema({
   hasBeenApproved: { type:Boolean, default:true, required:false },
   representing: { type:String, default:"", required:false },
   justification: { type:String, default:"", required:false },
-  demo: { type:Boolean, default:false, required:false }
-
+  demo: { type:Boolean, default:false, required:false },
+  hasBeenOnboarded: { type:Boolean, default:false, required:false },
+  
 }, schemaOptions);
 
 userSchema.pre('save', function(next) {
