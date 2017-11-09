@@ -76,6 +76,13 @@ const schema = {
           "id": "/properties/properties/asset/description", 
           "title": "Description", 
           "type": "string"
+        },
+        "isFractional": {
+          "description": "A fractional asset can be funded by multiple parties, while a non-fractional asset can be funded by only one party.", 
+          "id": "/properties/properties/isFractional", 
+          "title": "Is Fractional", 
+          "type": "boolean",
+          "default": true
         }
       }, 
       "type": "object",
@@ -117,7 +124,7 @@ const schema = {
         },
         "country": {
           "description": "The user's country.",
-          "id": "/properties/location/country",
+          "id": "/properties/location/properties/country",
           "title": "Country",
           "type": "string"
         }

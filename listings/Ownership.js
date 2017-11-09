@@ -118,6 +118,15 @@ module.exports.putOwnershipController = ({listingRepo, Asset = require("./../mod
       })
       return sendValidationError(res, [err]);
     }
+    if(!assetRecord.isFractional) {
+      if(amount != assetRecord.totalCost) {
+        const err = SingleErrorResponse.InvalidRequestError({
+          code: SingleErrorResponse.codes.mustFundFully,
+          message: `Non-fractional assets must be fully funded by one party. (${amount} of total: ${assetRecord.totalCost})`
+        });
+        return sendValidationError(res, [err]);
+      }
+    }
     let usersStake = assetRecord.ownership.stakes
       .find(i=>i.userId==userId);
     
