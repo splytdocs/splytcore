@@ -46,10 +46,15 @@ function createDemoAccount(doc, callback) {
     });
   }
   Ethereum.createWallet()
-  .then(function(address) {
-    write(address);
-  }, callback);
-  
+  .then(address => {
+    Ethereum.sendEther(address, (err, txHash) => {
+      console.log('maybe save this in db for future', txHash)
+    })
+    return address
+  })
+  .then( (address) => {
+    write(address)
+  }, callback)
 }
 module.exports.notify = (methods=null)=> function(req, res) {
   const input = req.body;
