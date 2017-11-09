@@ -30,6 +30,10 @@ var stakeSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true
+  },
+  shipTo:{
+    type: Object,
+    required: false
   }
 })
 
