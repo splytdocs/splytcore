@@ -85,7 +85,7 @@ module.exports.create = (notificationMethods=null) => function(req, res) {
     } else {
       return createUser();
     }
-    send500(res, null);
+    send500(res, err);
   };
   AccountCreation.canUserBeCreated()({username, email}, handle);
 };
