@@ -51,6 +51,7 @@ var contactCont = require('./controllers/contact');
 // Passport OAuth strategies
 require('./config/passport');
 
+
 var app = express();
 
 
@@ -59,6 +60,11 @@ mongoose.connect(process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
+});
+mongoose.connection.on('connected', function(info) {
+  try {
+    console.log(`MongoDB Connected to host: ${mongoose.connection.db.serverConfig.host}`);
+  }catch(e){}
 });
 if(process.env.DEBUG_MONGODB) mongoose.set('debug', true);
 app.set('views', path.join(__dirname, 'views'));
@@ -236,6 +242,10 @@ const awsSes = new AWS.SES({
   region:process.env.aws_region
 });
 
+const nodemailer = require("nodemailer");
+let mailer = nodemailer.createTransport({
+  SES: awsSes
+});
 
 app.post('/api/demo/accounts/notify', 
   Demo.notify([ViaSes(awsSes, process.env)])
@@ -243,8 +253,10 @@ app.post('/api/demo/accounts/notify',
 app.post('/api/demo/accounts/', 
   Demo.create([ViaSes(awsSes, process.env)])
 );
+const approvalNotifier = require("./demo/UserApproved")
+  .makeUserApprovedNotifier({mailer, config:process.env})
 app.get('/api/demo/accounts/approvals',
-  Demo.approve(process.env));
+  Demo.approve(process.env, approvalNotifier));
 // temporary double route to handle a few messed up entries
 // todo: remove it
 app.get('/api/demo/accounts/approve',
