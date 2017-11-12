@@ -89,7 +89,7 @@ module.exports.create = (notificationMethods=null) => function(req, res) {
   };
   AccountCreation.canUserBeCreated()({username, email}, handle);
 };
-module.exports.approve = (config)=> function(req, res) {
+module.exports.approve = (config, userApprovedNotifier)=> function(req, res) {
   const secret = req.query.secret;
   if(secret!=config.demo_approval_secret_key) {
     return sendNotAuthenticated(res);
@@ -102,6 +102,9 @@ module.exports.approve = (config)=> function(req, res) {
   function save(u) {
     u.save((err, data)=>{
       if(err) return send500(res, err);
+      if(u.hasBeenApproved) {
+        userApprovedNotifier.send(u);
+      }
       send200(res, "User has been approved.");
     });
   }
