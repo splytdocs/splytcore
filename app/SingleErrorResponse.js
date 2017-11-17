@@ -11,7 +11,8 @@ class SingleErrorResponse {
 module.exports.codes = {
   unique:"unique",
   unauthorized:"unauthorized",
-  notOpenForFunding:"not_open_for_funding"
+  notOpenForFunding:"not_open_for_funding",
+  insufficientFunds:"insufficient_funds"
 };
 module.exports.SingleErrorResponse = SingleErrorResponse;
 module.exports.InvalidRequestError = (document={code:"", param:"", message:""})=>{

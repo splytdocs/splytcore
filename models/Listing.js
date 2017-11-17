@@ -70,6 +70,11 @@ var listingSchema = new mongoose.Schema({
     type: ObjectId,
     required: true
   },
+  listedByWalletAddress: {
+    type: String,
+    required: false,
+    default: ""
+  },
   dateListed: {
     type: Date,
     default: Date.now,

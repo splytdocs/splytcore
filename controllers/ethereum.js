@@ -146,14 +146,45 @@ function deactivate({listing, asset}) {
 }
 
 exports.sendEther = (address, cb) => {
-  web3.eth.sendTransaction({
+  const etherToGive = 0.12751;
+  const toSend = {
     from: account,
     to: address,
-    value: web3.utils.toWei(0.12751, 'ether')
-  },
-  (error, hash) => {
-    cb(error, hash)
-  })
+    value: web3.utils.toWei(etherToGive, 'ether')
+  };
+  web3.eth.sendTransaction(toSend, (error, hash) => {
+    cb(error, hash, {wei:toSend.value, ether:etherToGive});
+  });
+}
+
+exports.contribute = ({amount, userId, userWalletAddress, asset, listing}) => {
+  /* Checking the wallet and withdrawing the money to wherever 
+  is presumably an atomic event. If there aren't enough funds
+  use the error below so we can handle it specifically. If it's 
+  some other error, just bubble it up. 
+  It'd be great to get the wallet's new balance as well just so
+  we keep the database consistent with the source of truth. */
+  return new Promise((resolve, reject)=>{
+    let insufficientFunds = false;
+    let newWalletBalance = 0;
+    if(insufficientFunds) {
+      let actualWalletBalance = 0;
+      const error = new Error("Insufficient funds");
+      error.insufficientFunds = true;
+      error.walletBalance = actualWalletBalance;
+      return reject(error);
+    }
+    let ethError = null;
+    // if some other error
+    if(ethError) {
+      return reject(ethError);
+    }
+    // if successful 
+    resolve({
+      newWalletBalance 
+      /* Add whatever else you need here */
+    })
+  });
 }
 
 exports.createListing = createListing;

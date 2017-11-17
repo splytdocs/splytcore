@@ -27,7 +27,8 @@ function getUserFromContext(req) {
   if(!req.user) throw 'req.user not found'
   return {
     id:req.user.id,
-    name:req.user.name
+    name:req.user.name,
+    walletAddress:req.user.walletAddress
   };
 };
 

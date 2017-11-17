@@ -112,6 +112,7 @@ function convertListingRequestToDocument(listingRequest) {
   const doc = Object.assign({}, listingRequest.listing);
   doc.listedByUserId = listingRequest.user.id;
   doc.assetId = listingRequest.assetId;
+  doc.listedByWalletAddress = listingRequest.user.walletAddress;
   const location = doc.location;
   doc.location.coordinates = [location.longitude, location.latitude];
   return doc;
