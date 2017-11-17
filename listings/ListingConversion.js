@@ -55,6 +55,9 @@ module.exports.toListingResponse = (ListingResponse = BackupListingResponse) => 
   if (fromDb.asset && fromDb.asset._doc) {
     made.asset = fromDb.asset._doc;
   }
+  if(fromDb.marketplace) {
+    removeMongoFields(_docOrSelf(made.marketplace));
+  }
   if (createdAsset) {
     made.asset = _docOrSelf(createdAsset);
   }

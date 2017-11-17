@@ -65,7 +65,10 @@ exports.deployContracts = function deployContracts(asset, listing) {
 // Will create listing contract
 function createListing(listing) {
   var listingContract = new web3.eth.Contract(listingAbi);
-
+  //listing.marketplace may be null for old listings
+  //also applies to editing
+  //listing.marketplace.walletAddress
+  //listing.marketplace.kickbackAmount
   listingContract.deploy({
     data: listingData,
     arguments: [listing._id, listing.title, listing.listedByUserId, listing.dateListed, listing.expirationDate, listing.assetAddress]
