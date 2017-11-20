@@ -12,6 +12,19 @@ var schemaOptions = {
     virtuals: true
   }
 };
+var listingMarketplaceSchema = new mongoose.Schema({
+  walletAddress: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  kickbackAmount: {
+    type: Number,
+    required: false,
+    default: 0,
+    min: 0
+  }
+});
 var locationSchema = new mongoose.Schema({
   latitude: {
     type: Number,
@@ -41,7 +54,12 @@ var locationSchema = new mongoose.Schema({
     type: [Number],  // [<longitude>, <latitude>]
     index: '2dsphere',
     required:false
-  }
+  },
+  country: {
+    type: String, 
+    default: "United States",
+    required: false
+  },
 });
 var listingSchema = new mongoose.Schema({
   title: {
@@ -51,6 +69,11 @@ var listingSchema = new mongoose.Schema({
   listedByUserId: {
     type: ObjectId,
     required: true
+  },
+  listedByWalletAddress: {
+    type: String,
+    required: false,
+    default: ""
   },
   dateListed: {
     type: Date,
@@ -81,7 +104,8 @@ var listingSchema = new mongoose.Schema({
     type: String,
     default: "",
     required: false
-  }
+  },
+  marketplace: listingMarketplaceSchema
 }, schemaOptions);
 
 function setComputedCoordinates() {

@@ -17,6 +17,7 @@ const send500 = helpers.send500,
 const Scrub = require("./../app/Scrub");
 const standardMongoScrub = Scrub.standardMongoScrub;
 const deleteSensitiveFields = Scrub.deleteSensitiveFields;
+const Ethereum = require("./../controllers/ethereum.js");
 
 function scrubUser(user) {
   const copy = Object.assign({}, user);
@@ -26,21 +27,34 @@ function scrubUser(user) {
 }
 
 function createDemoAccount(doc, callback) {
-  AccountCreation.sanitizeAndCreate(User)({
-    username:doc.email,
-    email:doc.email,
-    password:doc.password,
-    hasBeenApproved:false,
-    justification:doc.justification,
-    representing:doc.representing,
-    demo:true,
-    address:doc.address||"2800 E Observatory Rd, Los Angeles, CA 90027",
-    phone:doc.phone||"(999) 555-5555",
-    name:doc.name
-  }, (err, data)=>{
-    callback(err, data);
-  });
-  
+  function write(walletAddress) {
+    AccountCreation.sanitizeAndCreate(User)({
+      username:doc.email,
+      email:doc.email,
+      password:doc.password,
+      hasBeenApproved:false,
+      justification:doc.justification,
+      representing:doc.representing,
+      demo:true,
+      address:doc.address||"2800 E Observatory Rd, Los Angeles, CA 90027",
+      phone:doc.phone||"(999) 555-5555",
+      name:doc.name,
+      country:doc.country,
+      walletAddress:walletAddress
+    }, (err, data)=>{
+      callback(err, data);
+    });
+  }
+  Ethereum.createWallet()
+  .then(address => {
+    Ethereum.sendEther(address, (err, txHash) => {
+      console.log('maybe save this in db for future', txHash)
+    })
+    return address
+  })
+  .then( (address) => {
+    write(address)
+  }, callback)
 }
 module.exports.notify = (methods=null)=> function(req, res) {
   const input = req.body;
@@ -71,11 +85,11 @@ module.exports.create = (notificationMethods=null) => function(req, res) {
     } else {
       return createUser();
     }
-    send500(res, null);
+    send500(res, err);
   };
   AccountCreation.canUserBeCreated()({username, email}, handle);
 };
-module.exports.approve = (config)=> function(req, res) {
+module.exports.approve = (config, userApprovedNotifier)=> function(req, res) {
   const secret = req.query.secret;
   if(secret!=config.demo_approval_secret_key) {
     return sendNotAuthenticated(res);
@@ -88,6 +102,9 @@ module.exports.approve = (config)=> function(req, res) {
   function save(u) {
     u.save((err, data)=>{
       if(err) return send500(res, err);
+      if(u.hasBeenApproved) {
+        userApprovedNotifier.send(u);
+      }
       send200(res, "User has been approved.");
     });
   }

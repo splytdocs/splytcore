@@ -82,6 +82,13 @@ describe('CreateListingRequestJsonSchema', () => {
               "id": "/properties/properties/asset/description", 
               "title": "Description", 
               "type": "string"
+            },
+            "isFractional": {
+              "description": "A fractional asset can be funded by multiple parties, while a non-fractional asset can be funded by only one party.", 
+              "id": "/properties/properties/isFractional", 
+              "title": "Is Fractional", 
+              "type": "boolean",
+              "default": true
             }
           }, 
           "type": "object",
@@ -120,6 +127,12 @@ describe('CreateListingRequestJsonSchema', () => {
               "id": "/properties/location/properties/zip", 
               "title": "Zip", 
               "type": "string"
+            },
+            "country": {
+              "description": "The user's country.",
+              "id": "/properties/location/properties/country",
+              "title": "Country",
+              "type": "string"
             }
           }, 
           "type": "object"
@@ -129,6 +142,28 @@ describe('CreateListingRequestJsonSchema', () => {
           "id": "/properties/properties/description", 
           "title": "Description", 
           "type": "string"
+        },
+        "marketplace": {
+          "description": "The information relevant to the marketplace on which this listing is being created.", 
+          "id": "/properties/properties/marketplace", 
+          "title": "Marketplace", 
+          "type": "object",
+          "properties":{
+            "walletAddress": {
+              "description": "The wallet address of the marketplace on which this asset is listed.", 
+              "id": "/properties/properties/marketplace/walletAddress", 
+              "title": "Marketplace Wallet Address", 
+              "type": "string"
+            },
+            "kickbackAmount":{
+              "description": "The number of SATs to credit a Marketplace from the seller if the item is funded.", 
+              "id": "/properties/properties/marketplace/kickbackAmount", 
+              "title": "Marketplace Kickback Amount", 
+              "type": "number",
+              "default": 0,
+              "minimum": 0
+            }
+          }
         }
       }, 
       "type": "object"

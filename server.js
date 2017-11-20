@@ -38,6 +38,11 @@ const redirectPostSocial = (req, res)=>{
   res.redirect(postSocialLogin(output.token));
 };
 
+var standardTimeout = function() { return timeout('10s'); }
+function haltOnTimedout (req, res, next) {
+  if (!req.timedout) next()
+}
+
 // Controllers
 var HomeCont = require('./controllers/home');
 var userCont = require('./controllers/user');
@@ -45,6 +50,7 @@ var contactCont = require('./controllers/contact');
 
 // Passport OAuth strategies
 require('./config/passport');
+
 
 var app = express();
 
@@ -54,6 +60,11 @@ mongoose.connect(process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
+});
+mongoose.connection.on('connected', function(info) {
+  try {
+    console.log(`MongoDB Connected to host: ${mongoose.connection.db.serverConfig.host}`);
+  }catch(e){}
 });
 if(process.env.DEBUG_MONGODB) mongoose.set('debug', true);
 app.set('views', path.join(__dirname, 'views'));
@@ -91,14 +102,25 @@ function requireJwtAuthentication() {
 app.get('/', HomeCont.index);
 //app.get('/contact', contactCont.contactGet);
 //app.post('/contact', contactCont.contactPost);
-app.get('/api/accounts', requireJwtAuthentication(), userCont.accountGet);
+app.get('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  requireJwtAuthentication(), 
+  userCont.accountGet);
 //app.put('/api/accounts', requireJwtAuthentication(), userCont.accountPut);
 //app.delete('/api/accounts', userCont.ensureAuthenticated, userCont.accountDelete);
 //app.get('/signup', userCont.signupGet);
-app.post('/api/accounts', userCont.signupPost);
+app.post('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  userCont.signupPost);
+app.patch('/api/accounts', 
+  standardTimeout(), haltOnTimedout,
+  requireJwtAuthentication(), 
+  userCont.accountPatch);
 
 //app.get('/api/login', userCont.loginGet);
-app.post('/api/accounts/login', userCont.loginPost);
+app.post('/api/accounts/login', 
+  standardTimeout(), haltOnTimedout,
+  userCont.loginPost);
 //app.get('/forgot', userCont.forgotGet);
 //app.post('/forgot', userCont.forgotPost);
 //app.get('/reset/:token', userCont.resetGet);
@@ -121,16 +143,15 @@ app.get('/api/accounts/auth/twitter/callback',
 //todo: improve this
 var listings = require('./listings/listingController');
 const Ownership = require('./listings/Ownership');
-var standardTimeout = function() { return timeout('10s'); }
-function haltOnTimedout (req, res, next) {
-  if (!req.timedout) next()
-}
-
 const listingsRepo = require("./listings/contextualListingRepoService").choose();
 app.post('/api/listings/', 
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
   listings.create);
+app.get('/api/listings/mine/funded',
+  requireJwtAuthentication(),
+  standardTimeout(), haltOnTimedout,
+  listings.mineFunded);
 app.get('/api/listings/mine',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
@@ -221,6 +242,10 @@ const awsSes = new AWS.SES({
   region:process.env.aws_region
 });
 
+const nodemailer = require("nodemailer");
+let mailer = nodemailer.createTransport({
+  SES: awsSes
+});
 
 app.post('/api/demo/accounts/notify', 
   Demo.notify([ViaSes(awsSes, process.env)])
@@ -228,8 +253,10 @@ app.post('/api/demo/accounts/notify',
 app.post('/api/demo/accounts/', 
   Demo.create([ViaSes(awsSes, process.env)])
 );
+const approvalNotifier = require("./demo/UserApproved")
+  .makeUserApprovedNotifier({mailer, config:process.env})
 app.get('/api/demo/accounts/approvals',
-  Demo.approve(process.env));
+  Demo.approve(process.env, approvalNotifier));
 // temporary double route to handle a few messed up entries
 // todo: remove it
 app.get('/api/demo/accounts/approve',
@@ -237,14 +264,27 @@ app.get('/api/demo/accounts/approve',
 app.get('/api/accounts/demo/approve',
   Demo.approve(process.env));
 
+const countries = require("./controllers/country");
+app.get('/api/countries', 
+  standardTimeout(), haltOnTimedout,
+  countries.getAllCountries);
+
 // Production error handler
 app.use(function(err, req, res, next) {
   console.error(err.stack);
   res.sendStatus(err.status || 500);
 });
+const raygun = require("./app/logging/raygun");
+const rollbar = require("./app/logging/rollbar");
+raygun.register(app);
+rollbar.register(app);
 
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+process.on('unhandledRejection', function(reason, p){
+  console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+  // application specific logging here
+});
 module.exports = app;

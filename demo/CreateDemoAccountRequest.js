@@ -37,6 +37,12 @@ const schema = {
       "title": "Why do you want access?",
       "type": "string"
     },
+    "country": {
+      "description": "The user's country.",
+      "id": "/properties/location/country",
+      "title": "Country",
+      "type": "string"
+    }
   },
   "type": "object"
 };

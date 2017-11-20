@@ -30,6 +30,10 @@ var stakeSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true
+  },
+  shipTo:{
+    type: Object,
+    required: false
   }
 })
 
@@ -112,6 +116,11 @@ var assetSchema = new mongoose.Schema({
     default:0,
     required:false
   },
+  isFractional: {
+    type: Boolean,
+    default: true,
+    required: false
+  },
   ownership: ownershipSchema
 }, schemaOptions);
 
@@ -154,7 +163,7 @@ function recalculateTotalCost() {
 function closeUponFundingAchieved() {
   const record = this;
   if(record.amountFunded >= record.totalCost) {
-    record.ownership.status = "FUNDED";
+    record.ownership.status = fundedStatus;
     record.emit("funded", {asset:record});
   }
 }

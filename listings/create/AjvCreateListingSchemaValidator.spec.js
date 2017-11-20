@@ -24,6 +24,10 @@ describe('AjvCreateListingSchemaValidator', () => {
           "state":"California",
           "zip":"90001"
         },
+        "marketplace": {
+          "walletAddress":"0xe56cd8488440cce9c413f9e36e01dab2e3c58a32",
+          "kickbackAmount":1234
+        },
         "asset": {
           "term": 317,
           "termType": "WEEKLY",
@@ -33,7 +37,8 @@ describe('AjvCreateListingSchemaValidator', () => {
           "costBreakdown":[{
             "id":"base",
             "amount":80000
-          }]
+          }],
+          "isFractional": true
         }
       }
     };
@@ -242,6 +247,12 @@ describe('AjvCreateListingSchemaValidator', () => {
       it('should have no errors validating `asset.mode` when mode is Sell', () => {
         const data = validSample();
         data.asset.mode = "Sell";
+        const results = runValidationOn(data);
+        expect(results.length).toEqual(0);
+      });
+      it('should have no errors requiring `asset.isFractional` when undefined', () => {
+        const data = validSample();
+        delete data.asset.isFractional;
         const results = runValidationOn(data);
         expect(results.length).toEqual(0);
       });

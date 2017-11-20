@@ -16,6 +16,14 @@ var userSchema = new mongoose.Schema({
   address: String,
   phone: String,
   city: String,
+  country: {
+    type: String, 
+    default: "United States"
+  },
+  numberOfFundedAssets:{
+    type: Number,
+    default: 0
+  },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -34,8 +42,9 @@ var userSchema = new mongoose.Schema({
   hasBeenApproved: { type:Boolean, default:true, required:false },
   representing: { type:String, default:"", required:false },
   justification: { type:String, default:"", required:false },
-  demo: { type:Boolean, default:false, required:false }
-
+  demo: { type:Boolean, default:false, required:false },
+  hasBeenOnboarded: { type:Boolean, default:false, required:false },
+  
 }, schemaOptions);
 
 userSchema.pre('save', function(next) {
