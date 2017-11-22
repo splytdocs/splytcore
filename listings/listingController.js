@@ -142,6 +142,11 @@ exports.create = function(req, res, next) {
     asset: Object.assign({}, newListing.asset)
   };
   listingRequest.listing.title = newListing.asset.title;
+  if(!listingRequest.listing.marketplace){
+    listingRequest.listing.marketplace = {
+      kickbackAmount:0
+    }
+  }
   listingRequest.listing.marketplace.walletAddress = inferMarketplaceWalletAddressFromRequest(req);
   delete listingRequest.listing.asset;
 
