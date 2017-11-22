@@ -25,7 +25,6 @@ describe('AjvCreateListingSchemaValidator', () => {
           "zip":"90001"
         },
         "marketplace": {
-          "walletAddress":"0xe56cd8488440cce9c413f9e36e01dab2e3c58a32",
           "kickbackAmount":1234
         },
         "asset": {

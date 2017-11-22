@@ -21,6 +21,7 @@ const Listing = require("./../models/Listing");
 const ListingDeactivator = require("./deactivate/ListingDeactivator");
 
 const statuses = require("./OwnershipStatuses").makeStatuses();
+const inferMarketplaceWalletAddressFromRequest = require("./../marketplace/Auth").inferMarketplaceWalletAddressFromRequest;
 
 function getUserFromContext(req) {
   /* Be sure you're authenticated, otherwise this won't be here */
@@ -141,7 +142,7 @@ exports.create = function(req, res, next) {
     asset: Object.assign({}, newListing.asset)
   };
   listingRequest.listing.title = newListing.asset.title;
-
+  listingRequest.listing.marketplace.walletAddress = inferMarketplaceWalletAddressFromRequest(req);
   delete listingRequest.listing.asset;
 
   function inlineAsset() {
@@ -251,6 +252,10 @@ exports.editListing = (editor) => function(req, res) {
   const target = req.body;
   const listingId = req.params.id;
   target.id = listingId;
+  if(target.marketplace) {
+    // Don't overwrite originating marketplace
+    delete target.marketplace.walletAddress;
+  }
   const userId = req.user.id;
   const results = editor.edit(target, userId);
 
