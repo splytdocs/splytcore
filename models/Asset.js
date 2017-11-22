@@ -34,6 +34,11 @@ var stakeSchema = new mongoose.Schema({
   shipTo:{
     type: Object,
     required: false
+  },
+  contributingMarketplaceWalletAddress:{
+    type: String,
+    default: "",
+    required: false
   }
 })
 

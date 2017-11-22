@@ -15,6 +15,7 @@ const SingleErrorResponse = require("./../app/SingleErrorResponse");
 const codes = SingleErrorResponse.codes;
 const User = require("./../models/User");
 const ethereum = require("./../controllers/ethereum")
+const inferMarketplaceWalletAddressFromRequest = require("./../marketplace/Auth").inferMarketplaceWalletAddressFromRequest;
 
 function makeCriteria(userId) {
   return searchCriteriaBuilder({
@@ -65,25 +66,27 @@ function persistAssetAndRespond(res, assetRecord) {
     prepAssetAndSend200(res, assetRecord);
   });
 }
-function createStake(res, Asset, {assetRecord, userId, amount}) {
+function createStake(res, Asset, {assetRecord, userId, amount, contributingMarketplaceWalletAddress}) {
   User.findById(userId, (err, user)=> {
     if(err) return send500(res, err);
     assetRecord.ownership.stakes.push({
       userId, amount,
       shipTo:{
         country:user.country
-      }
+      },
+      contributingMarketplaceWalletAddress
     });
     persistAssetAndRespond(res, assetRecord);
   })
 }
-function updateStake(res, Asset, {assetRecord, usersStake, userId, amount}){
+function updateStake(res, Asset, {assetRecord, usersStake, userId, amount, contributingMarketplaceWalletAddress}){
   User.findById(userId, (err, user)=> {
     if(err) return send500(res, err);
     usersStake.amount = amount;
     usersStake.shipTo = {
       country:user.country
     };
+    usersStake.contributingMarketplaceWalletAddress = contributingMarketplaceWalletAddress;
     persistAssetAndRespond(res, assetRecord);
   });
 }
@@ -111,7 +114,7 @@ function isOpenForFunding(assetRecord) {
   return assetRecord.ownership.status == statuses.open;
 };
 
-function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress, amount}) {
+function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress, amount, contributingMarketplaceWalletAddress}) {
   if(!isOpenForFunding(assetRecord)) {
     const err = SingleErrorResponse.InvalidRequestError({
       code: SingleErrorResponse.codes.notOpenForFunding,
@@ -136,9 +139,9 @@ function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress,
       (asset)=>handleAfterFundingReached(deactivator, asset.asset));
   
     if(usersStake == null) {
-      createStake(res, Asset, {assetRecord, userId, amount});
+      createStake(res, Asset, {assetRecord, userId, amount, contributingMarketplaceWalletAddress});
     } else {
-      updateStake(res, Asset, {assetRecord, usersStake, userId, amount});
+      updateStake(res, Asset, {assetRecord, usersStake, userId, amount, contributingMarketplaceWalletAddress});
     }
   }
   function handleInsufficientFunds(walletBalance) {
@@ -154,7 +157,9 @@ function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress,
     bcAsset.id = String(bcAsset._id);
     bcListing.id = String(bcListing._id);
     blockchain.contribute({
-        amount, userId, userWalletAddress, 
+        amount, userId,
+        userWalletAddress,
+        contributingMarketplaceWalletAddress,
         asset: bcAsset,
         listing: bcListing
     }).then(handleSufficientFunds, (err)=> {
@@ -167,8 +172,9 @@ function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress,
 
   Listing.findOne({
     assetId:assetRecord._id
-  }).then(runContributionOnBlockchain, (e)=>send500(res, e));;
+  }).then((runContributionOnBlockchain, (e)=>send500(res, e)));
 }
+
 module.exports.putOwnershipController = ({listingRepo, Asset = require("./../models/Asset"), deactivator}) => (req, res, next)=>{
   // This is very much a utility method right now
   // It will need to behave much differently with real data
@@ -177,6 +183,8 @@ module.exports.putOwnershipController = ({listingRepo, Asset = require("./../mod
   const userWalletAddress = req.user.walletAddress;
   const assetId = req.query.assetId;
   const amount = parseFloat(req.query.amount);
+  const contributingMarketplaceWalletAddress = inferMarketplaceWalletAddressFromRequest(req);
+
   Asset.findById(assetId, (err, assetRecord)=>{
     if(err) {return send500(res, err);}
     if(!assetRecord) { return send404Message(res, "Asset not found") };
@@ -185,7 +193,7 @@ module.exports.putOwnershipController = ({listingRepo, Asset = require("./../mod
         stakes:[]
       }
     }
-    applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress, amount});
+    applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress, amount, contributingMarketplaceWalletAddress});
   });
   // todo: This will obviously require wallet & blockchain interaction at some point
 };
