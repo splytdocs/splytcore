@@ -157,7 +157,7 @@ exports.sendEther = (address, cb) => {
   });
 }
 
-exports.contribute = ({amount, userId, userWalletAddress, asset, listing}) => {
+exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contributingMarketplaceWalletAddress}) => {
   /* Checking the wallet and withdrawing the money to wherever 
   is presumably an atomic event. If there aren't enough funds
   use the error below so we can handle it specifically. If it's 

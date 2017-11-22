@@ -172,7 +172,7 @@ function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress,
 
   Listing.findOne({
     assetId:assetRecord._id
-  }).then((runContributionOnBlockchain, (e)=>send500(res, e)));
+  }).then(runContributionOnBlockchain, (e)=>send500(res, e));
 }
 
 module.exports.putOwnershipController = ({listingRepo, Asset = require("./../models/Asset"), deactivator}) => (req, res, next)=>{
