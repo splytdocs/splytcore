@@ -5,6 +5,7 @@ module.exports.send500 = function(res, error) {
   if(error == null) error = fallback;
   const sendFullError = true ;
   const toSend = sendFullError ? error : fallback; 
+  console.log("send500:", toSend);
   res.status(500).json(toSend);
 };
 module.exports.send200 = function(res, output) {

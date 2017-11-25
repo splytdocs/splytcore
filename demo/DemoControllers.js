@@ -19,16 +19,19 @@ const standardMongoScrub = Scrub.standardMongoScrub;
 const deleteSensitiveFields = Scrub.deleteSensitiveFields;
 const Ethereum = require("./../controllers/ethereum.js");
 
+function log() {
+  console.log("Demo Accounts:", ...arguments);
+}
+
 function scrubUser(user) {
   const copy = Object.assign({}, user);
   return deleteSensitiveFields(
     standardMongoScrub(copy)
   );
 }
-
 function createDemoAccount(doc, callback) {
   function write(walletAddress) {
-    AccountCreation.sanitizeAndCreate(User)({
+    const making = {
       username:doc.email,
       email:doc.email,
       password:doc.password,
@@ -41,20 +44,29 @@ function createDemoAccount(doc, callback) {
       name:doc.name,
       country:doc.country,
       walletAddress:walletAddress
-    }, (err, data)=>{
+    };
+    const logging = Object.assign({}, making);
+    delete logging.password;
+    log("Attempting to write", logging);
+    AccountCreation.sanitizeAndCreate(User)(making, (err, data)=>{
+      if(err) log("Write failed in sanitizeAndCreate", err);
       callback(err, data);
     });
   }
-  Ethereum.createWallet()
-  .then(address => {
+  log("Attempting to create wallet");
+  
+  Ethereum.createWallet().then(address => {
+    write(address);
     Ethereum.sendEther(address, (err, txHash) => {
-      console.log('maybe save this in db for future', txHash)
+      log('sendEther', err, txHash);
     })
     return address
+  }, (err)=> {
+    const logging = Object.assign({}, doc);
+    delete logging.password;
+    log(`Failed to create wallet: `, err, logging);
+    callback(new Error("Failed to create wallet, try again. Sorry!"), null);
   })
-  .then( (address) => {
-    write(address)
-  }, callback)
 }
 module.exports.notify = (methods=null)=> function(req, res) {
   const input = req.body;
@@ -65,13 +77,19 @@ module.exports.create = (notificationMethods=null) => function(req, res) {
   const input = req.body;
   const errors = validator.validate(input);
   if (errors.length > 0) {
+    log("400:", errors);
     return sendValidationError(res, errors);
   }
   function createUser() {
+    const toLog = Object.assign({}, input);
+    delete toLog.password;
+    log("createUser", toLog);
     createDemoAccount(input, (err, made)=>{
       if(err) {
+        log(`create failed, ${input.email}`, err);
         send500(res, err);
       } else {
+        log(`created successfully ${input.email}`);
         send200(res, scrubUser(made));
         notify(notificationMethods)(made._doc);
       }
@@ -81,6 +99,7 @@ module.exports.create = (notificationMethods=null) => function(req, res) {
   const username = input.username, email = input.email;
   const handle = (err, data)=>{
     if(err) {
+      log("cannot be created", err, data);
       return sendValidationError(res, err);
     } else {
       return createUser();
