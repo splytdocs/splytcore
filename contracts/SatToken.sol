@@ -16,5 +16,11 @@ contract SatToken is ERC20 {
     
     
     //TODO: Put splyt related $$ transfer logic here
+    
+    function initUser() {
+        ERC20.initUser();
+    }
+    
+    
 }
 
