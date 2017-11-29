@@ -98,7 +98,7 @@ exports.signupPost = function(req, res, next) {
     const doc = Object.assign({}, input);
     Ethereum.createWallet()
     .then(address => {
-      Ethereum.sendEther(address, (err, txHash) => {
+      Ethereum.giveOutTokens(address, (err, txHash) => {
         console.log('maybe save this in db for future')
       })
       return address

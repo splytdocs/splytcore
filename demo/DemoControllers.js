@@ -57,7 +57,7 @@ function createDemoAccount(doc, callback) {
   
   Ethereum.createWallet().then(address => {
     write(address);
-    Ethereum.sendEther(address, (err, txHash) => {
+    Ethereum.giveOutTokens(address, (err, txHash) => {
       log('sendEther', err, txHash);
     })
     return address
