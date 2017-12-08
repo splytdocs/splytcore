@@ -13,7 +13,7 @@ contract Listing {
 
 
     modifier onlyOwner() {
-        if(msg.sender == owner) {
+        if (msg.sender == owner) {
             _;
         }
     }
@@ -26,7 +26,8 @@ contract Listing {
         string _dateListed,
         string _expirationDate,
         address _assetAddress
-        ) {
+        ) public
+        {
             owner = msg.sender;
             listingId = _listingId;
             title = _title;
@@ -38,19 +39,19 @@ contract Listing {
     }
 
 
-    function getListingConfig() onlyOwner constant returns(string, string, string, string, bool, string, address, address) {
+    function getListingConfig() onlyOwner public constant returns(string, string, string, string, bool, string, address, address) {
         return (listingId, title, listedByUserId, dateListed, isActive, expirationDate, owner, assetAddress);
     }
 
-    function changeActiveInactive (bool _isActive) onlyOwner {
+    function changeActiveInactive (bool _isActive) onlyOwner public {
         isActive = _isActive;
     }
 
-    function changeTitle (string _title) onlyOwner {
+    function changeTitle (string _title) onlyOwner public {
         title = _title;
     }
 
-    function changeExpirationDate (string _expirationDate) onlyOwner {
+    function changeExpirationDate (string _expirationDate) onlyOwner public {
         expirationDate = _expirationDate;
     }
 }

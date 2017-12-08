@@ -182,6 +182,7 @@ app.get('/api/ownership',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,
   Ownership.getOwnershipController(listingsRepo));
+  
 app.put('/api/ownership',
   requireJwtAuthentication(),
   standardTimeout(), haltOnTimedout,

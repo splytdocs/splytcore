@@ -157,7 +157,8 @@ function applyToAsset(res, deactivator, {assetRecord, userId, userWalletAddress,
     bcAsset.id = String(bcAsset._id);
     bcListing.id = String(bcListing._id);
     blockchain.contribute({
-        amount, userId,
+        amount, 
+        userId,
         userWalletAddress,
         contributingMarketplaceWalletAddress,
         asset: bcAsset,

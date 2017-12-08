@@ -16,25 +16,19 @@ contract Asset {
     mapping(string => uint) contributions;
 
     modifier onlyOwner {
-        if(msg.sender == owner) {
+        if (msg.sender == owner) {
             _;
         }
     }
 
-    function Asset(
-        string _assetId,
-        uint _term,
-        string _termType,
-        string _title,
-        uint _totalCost
-        ) public {
-
+    function Asset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, address _owner) public {
         assetId = _assetId;
         term = _term;
         termType = _termType;
         openForContributions = true;
         title = _title;
         totalCost = _totalCost;
+        owner = _owner;
     }
 
     function getAssetConfig() public constant returns(string, uint, string, uint, string, bool, uint, address) {
@@ -51,12 +45,12 @@ contract Asset {
     }
 
     function contribute(string _userId) public payable {
-        if(!openForContributions) {
+        if (!openForContributions) {
             msg.sender.transfer(msg.value);
             revert();
         }
-        bool shouldRefundMoney =  addToTotalContributions();
-        if(shouldRefundMoney) {
+        bool shouldRefundMoney = addToTotalContributions();
+        if (shouldRefundMoney) {
             msg.sender.transfer(msg.value);
         }
         contributions[_userId] += msg.value;
@@ -64,7 +58,7 @@ contract Asset {
     }
 
     function addToTotalContributions() private returns(bool) {
-        if(amountFunded + msg.value <= totalCost) {
+        if (amountFunded + msg.value <= totalCost) {
             amountFunded += msg.value;
             return false;
         } else {

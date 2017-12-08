@@ -22,15 +22,15 @@ contract ERC20 {
         }
     }
     
-    function totalSupply() constant returns (uint) {
+    function totalSupply() public pure returns (uint) {
         return totalTokensAllowed;
     }
     
-    function balanceOf(address _owner) constant returns (uint balance) {
+    function balanceOf(address _owner) public constant returns (uint balance) {
         return user[_owner].balance;
     }
     
-    function transfer(address _to, uint _value) returns (bool success) {
+    function transfer(address _to, uint _value) public returns (bool success) {
         if (user[msg.sender].balance >= _value) {
             user[msg.sender].balance -= _value;
             user[_to].balance += _value;
@@ -40,7 +40,7 @@ contract ERC20 {
         }
     }
     
-    function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         if(user[_from].balance >= _value) {
             user[_from].balance -= _value;
             user[_to].balance += _value;
@@ -51,13 +51,13 @@ contract ERC20 {
         }
     }
     
-    function approve(address _spender, uint _value) returns (bool success) {
+    function approve(address _spender, uint _value) public returns (bool success) {
         user[msg.sender].allowance[_spender] = _value;
         ApprovalEvent(msg.sender, _spender, _value);
         return true;
     }
     
-    function allowance(address _owner, address _spender) constant returns (uint remaining) {
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
         return user[_owner].allowance[_spender];
     }
     
@@ -66,8 +66,8 @@ contract ERC20 {
     */
     
     // Temperory give each user 2000 tokens for free
-    function initUser() onlyOnce {
-        user[msg.sender].balance = 2000;
+    function initUser(address _user) public onlyOnce {
+        user[_user].balance = 2000;
         totalMinted += 2000;
     }
     
