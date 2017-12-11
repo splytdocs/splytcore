@@ -133,10 +133,8 @@ exports.createWallet = () => {
 
 function getWalletBalance (address, cb) {
   var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
-  
+
   splytToken.methods.balanceOf(address).call({from:account}, function (err, balance) {
-    console.log(err)
-    console.log(balance)
     cb(err, balance)
   })
   // web3.eth.getBalance(address, (err, balance) => {
@@ -160,7 +158,7 @@ function deactivate({listing, asset}) {
 
 exports.giveOutTokens = (address, cb) => {
   var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
-  
+
   splytToken.methods.initUser(address).send({
     from: account,
     gas: 4300000,
@@ -185,10 +183,10 @@ exports.giveOutTokens = (address, cb) => {
 }
 
 exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contributingMarketplaceWalletAddress}) => {
-  /* Checking the wallet and withdrawing the money to wherever 
+  /* Checking the wallet and withdrawing the money to wherever
   is presumably an atomic event. If there aren't enough funds
-  use the error below so we can handle it specifically. If it's 
-  some other error, just bubble it up. 
+  use the error below so we can handle it specifically. If it's
+  some other error, just bubble it up.
   It'd be great to get the wallet's new balance as well just so
   we keep the database consistent with the source of truth. */
   return new Promise((resolve, reject)=>{
@@ -206,23 +204,26 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
       // tell sat token contract to transfer totalCost amount to seller
       // resolve()
     }
+    if(!web3.utils.isAddress(userWalletAddress)) {
+      return reject(new Error('User address not defined'))
+    }
     getWalletBalance(userWalletAddress, (err, balance) => {
       if(err) {
         console.log('1')
         return reject(err)
       } else if(balance < amount) {
-        console.log('2')        
+        console.log('2')
         return reject(new Error('Insufficient funds'))
       }
-      console.log('3')      
+      console.log('3')
       getAssetTotalCost(listing._id, asset._id)
       .then((totalCost, owner) => {
         console.log(totalCost)
         console.log(owner)
-        console.log('10')              
+        console.log('10')
         var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
         // if(totalCost == amount) {
-          console.log('11')                        
+          console.log('11')
           splytToken.methods.transferFrom(userWalletAddress, listing.listedByWalletAddress, amount).send({
             from: account,
             gas: 4300000,
@@ -238,7 +239,7 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
             }
           })
         // }
-        
+
       })
     })
 
@@ -256,46 +257,46 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
     // if(ethError) {
     //   return reject(ethError);
     // }
-    // // if successful 
+    // // if successful
     // resolve({
-    //   newWalletBalance 
+    //   newWalletBalance
     //   /* Add whatever else you need here */
     // })
   });
 }
 
 function getAssetTotalCost(listingId, assetId) {
-  
+
   return new Promise((resolve, reject)=>{
-    console.log('4')    
+    console.log('4')
     var splytTracker = new web3.eth.Contract(splytTrackerAbi, splytTrackerAddress);
     splytTracker.methods.getAddressById('0x' + listingId.toString()).call({from:account}, function (err, listingAddress) {
       console.log(listingAddress)
-      console.log('5')      
+      console.log('5')
       if(err) {
-        console.log('6')        
+        console.log('6')
         return reject(err)
-      } else if(listingAddress.length < 5) {
-        console.log('7')        
+      } else if(!web3.utils.isAddress(listingAddress)) {
+        console.log('7')
         return reject(new Error('Listing not found on blockchain'))
       }
 
-      let listingContract = new web3.eth.Contract(listingAbi, listingAddress);      
-      listingContract.methods.getListingConfig().call({from:account}, 
+      let listingContract = new web3.eth.Contract(listingAbi, listingAddress);
+      listingContract.methods.getListingConfig().call({from:account},
         function (err, res) {
-          console.log('7')          
+          console.log('7')
           if(err) {
-            console.log('8')            
+            console.log('8')
             return reject(err)
           } else if(res['7'].length < 5) {
-            console.log('9')            
+            console.log('9')
             return reject(new Error('Asset not found on blockchain'))
           }
-          
+
           let assetContract = new web3.eth.Contract(assetAbi, res['7'])
           assetContract.methods.getAssetConfig().call({from:account},
             function (err, res) {
-              console.log('10')              
+              console.log('10')
               resolve(res['6'], res['7'])
             })
       })
