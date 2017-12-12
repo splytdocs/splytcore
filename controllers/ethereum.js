@@ -278,7 +278,7 @@ function getAssetTotalCost(listingId, assetId) {
       if(err) {
         console.log('6')
         return reject(err)
-      } else if(badAddresses.indexOf(userWalletAddress) > -1) {
+      } else if(badAddresses.indexOf(listingAddress.toString()) > -1) {
         console.log('7')
 
         return reject(new Error('Listing not found on blockchain'))
