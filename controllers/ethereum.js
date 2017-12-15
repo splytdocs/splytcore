@@ -218,14 +218,17 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
         return reject(new Error('Insufficient funds'))
       }
       console.log('3')
-      getAssetTotalCost(listing._id, asset._id)
+      console.log('listing id', listing.id)
+      console.log('asset id', asset.id)
+      getAssetTotalCost(listing.id, asset.id)
       .then((totalCost, owner) => {
-        console.log(totalCost)
-        console.log(owner)
+        console.log('total cost for this asset', totalCost)
+        console.log('owner of this asset', owner)
         console.log('10')
         var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
         // if(totalCost == amount) {
           console.log('11')
+          console.log('transfer from params:', userWalletAddress, listing.listedByWalletAddress, amount)
           splytToken.methods.transferFrom(userWalletAddress, listing.listedByWalletAddress, amount).send({
             from: account,
             gas: 4300000,
@@ -272,8 +275,9 @@ function getAssetTotalCost(listingId, assetId) {
   return new Promise((resolve, reject)=>{
     console.log('4')
     var splytTracker = new web3.eth.Contract(splytTrackerAbi, splytTrackerAddress);
-    splytTracker.methods.getAddressById('0x' + listingId.toString()).call({from:account}, function (err, listingAddress) {
-      console.log(listingAddress)
+    var hexListingId = '0x' + listingId.toString()
+    splytTracker.methods.getAddressById(hexListingId).call({from:account}, function (err, listingAddress) {
+      console.log('listing address', listingAddress)
       console.log('5')
       if(err) {
         console.log('6')
