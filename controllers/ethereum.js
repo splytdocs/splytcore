@@ -48,8 +48,8 @@ exports.deployContracts = function deployContracts(asset, listing) {
   console.log('Asset expirationDate:', expDateInSecs)
   splytTracker.methods.createAsset(asset.id.toString(), asset.term, asset.termType.toString(), asset.title.toString(), asset.totalCost, expDateInSecs).send({
     from: account,
-    gas: 200000,
-    gasPrice: 99000000000
+    gas: 2000000,
+    gasPrice: 31000000000
   },
   (err, trxHash) => {
     if(err) {
@@ -134,9 +134,9 @@ exports.createWallet = () => {
 }
 
 function getWalletBalance (address, cb) {
-  var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
+  var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
 
-  splytToken.methods.balanceOf(address).call({from:account}, function (err, balance) {
+  satToken.methods.balanceOf(address).call({from:account}, function (err, balance) {
     cb(err, balance)
   })
   // web3.eth.getBalance(address, (err, balance) => {
@@ -159,9 +159,9 @@ function deactivate({listing, asset}) {
 }
 
 exports.giveOutTokens = (address, cb) => {
-  var splytToken = new web3.eth.Contract(splytTokenAbi, splytTokenAddress);
+  var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
 
-  splytToken.methods.initUser(address).send({
+  satToken.methods.initUser(address).send({
     from: account,
     gas: 4300000,
     gasPrice: 700000000000
@@ -216,15 +216,15 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
       console.log('Buyer Wallet address:', userWalletAddress)
       console.log('Seller Wallet address:', listing.listedByWalletAddress)
       console.log('Amount contributing', amount)
-      splytTracker.methods.payout(
+      satToken.methods.payout(
         asset.id.toString(),
-        listing.listedByWalletAddress.toString(),
         userWalletAddress.toString(),
+        listing.listedByWalletAddress.toString(),
         amount
       ).send({
         from: account,
-        gas: 200000,
-        gasPrice: 99000000000
+        gas: 2000000,
+        gasPrice: 31000000000
       },
       (err, trxHash) => {
         if(err) {
@@ -235,7 +235,8 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
       })
       .then(newContractInstance => {
         console.log('Contribution Successful!')
-        resolve()
+        var err = { insufficientFunds: false }
+        resolve(err)
       })
       .error(err => {
         console.log('Error trying to contribute to an asset')
