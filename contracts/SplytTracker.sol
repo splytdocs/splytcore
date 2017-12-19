@@ -1,52 +1,42 @@
 pragma solidity ^0.4.0;
-import "browser/Listing.sol";
+// Dec 18, 2017
+
+import "browser/Asset.sol";
 
 contract SplytTracker {
 
-    mapping (address => string) idByAddress;
-    mapping (string => address) addressById;
+    mapping (address => string) assetIdByAddress;
+    mapping (string => address) addressByassetId;
     uint public version;
     string public ownedBy;
+    
+    event Error(uint _code, string _message);
+    event Success(uint _code, address _assetAddress);
 
-    function SplytTracker(uint _version, string _ownedBy) {
+    function SplytTracker(uint _version, string _ownedBy) public {
         version = _version;
         ownedBy = _ownedBy;
     }
 
     // Setter functions
-    function createListing(
-        string _listingId,
-        string _title,
-        string _listedByUserId,
-        string _dateListed,
-        string _expirationDate,
-        address _assetAddress
-        ) private returns(bool) {
-        address newListing = new Listing(
-            _listingId,
-            _title,
-            _listedByUserId,
-            _dateListed,
-            _expirationDate,
-            _assetAddress
-            );
-        idByAddress[newListing] = _listingId;
-        addressById[_listingId] = newListing;
-        return true;
+    function createAsset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _exiprationDate) public returns(bool) {
+        address newAsset = new Asset(_assetId, _term, _termType, _title, _totalCost, _exiprationDate);
+        assetIdByAddress[newAsset] = _assetId;
+        addressByassetId[_assetId] = newAsset;
     }
 
-    function addToTracker(string _listingId, address _listingAddressS) returns (bool) {
-        idByAddress[_listingAddressS] = _listingId;
-        addressById[_listingId] = _listingAddressS;
-        return true;
-    }
+    // function addToTracker(string _listingId, address _listingAddressS) returns (bool) {
+    //     idByAddress[_listingAddressS] = _listingId;
+    //     addressById[_listingId] = _listingAddressS;
+    //     return true;
+    // }
 
     // Getter functions
     function getAddressById (string _listingId) public constant returns (address) {
-        return addressById[_listingId];
+        return addressByassetId[_listingId];
     }
 
     function getIdByAddress (address _contractAddr) public constant returns (string) {
-        return idByAddress[_contractAddr];
+        return assetIdByAddress[_contractAddr];
     }
 }

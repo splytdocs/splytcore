@@ -1,60 +1,43 @@
 pragma solidity ^0.4.0;
-
-
+// Dec 18, 2017
 
 contract Asset {
 
-    string assetId;
-    uint term;
-    string termType;
-    uint amountFunded;
-    string title;
-    bool openForContributions;
-    uint totalCost;
-    address owner;
+    string public assetId;
+    uint public term;
+    string public termType;
+    uint public amountFunded;
+    string public title;
+    uint public totalCost;
+    uint public expirationDate;
+    bool public isContract;
 
     mapping(string => uint) contributions;
 
-    modifier onlyOwner {
-        if (msg.sender == owner) {
-            _;
-        }
-    }
-
-    function Asset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, address _owner) public {
+    function Asset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _expirationDate) public {
         assetId = _assetId;
         term = _term;
         termType = _termType;
-        openForContributions = true;
         title = _title;
         totalCost = _totalCost;
-        owner = _owner;
+        expirationDate = _expirationDate;
+        isContract = true;
     }
 
-    function getAssetConfig() public constant returns(string, uint, string, uint, string, bool, uint, address) {
-        return (assetId, term, termType, amountFunded, title, openForContributions, totalCost, owner);
+    function getAssetConfig() public constant returns(string, uint, string, uint, string, bool, uint, uint) {
+        return (assetId, term, termType, amountFunded, title, isOpenForContribution(), totalCost, expirationDate);
     }
 
-    function changeTitle(string _title) public onlyOwner {
+    function changeTitle(string _title) public {
         title = _title;
     }
 
-    // Fallback function to anyone who pays from outside the ecosystem
-    function() public payable {
-        msg.sender.transfer(msg.value);
-    }
-
-    function contribute(string _userId) public payable {
-        if (!openForContributions) {
-            msg.sender.transfer(msg.value);
-            revert();
+    // Call this function from sat token to verify contributions are open and check for fractional or not
+    function contributePrecheck() public constant returns(bool) {
+        if(isOpenForContribution()) {
+            return true;
         }
-        bool shouldRefundMoney = addToTotalContributions();
-        if (shouldRefundMoney) {
-            msg.sender.transfer(msg.value);
-        }
-        contributions[_userId] += msg.value;
-
+        return false;
     }
 
     function addToTotalContributions() private returns(bool) {
@@ -68,5 +51,24 @@ contract Asset {
 
     function getMyContributions(string _userId) public constant returns (uint) {
         return contributions[_userId];
+    }
+    
+    function isOpenForContribution() private constant returns (bool) {
+       if(totalCost <= amountFunded || now <= expirationDate) {
+           return true;
+       }
+       return false;
+    }
+    
+    function isFractional() public constant returns (bool) {
+        if(term > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function setFunded(uint _amountFund) public {
+        amountFunded = _amountFund;
     }
 }

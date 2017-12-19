@@ -1,4 +1,5 @@
 pragma solidity ^0.4.18;
+// Dec 18, 2017
 
 contract ERC20 {
     
