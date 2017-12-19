@@ -37,9 +37,9 @@ const badAddresses = ['0x0000000000000000000000000000000000000000', '0x0', '', '
 // Will create asset contract
 exports.deployContracts = function deployContracts(asset, listing) {
 
-  var splytTracker = new web3.eth.Contract(splytTrackerAbi, splytTrackerAddress);
-  var d = new Date(listing.expirationDate)
-  var expDateInSecs = Math.round(d.getTime() / 1000)
+  let splytTracker = new web3.eth.Contract(splytTrackerAbi, splytTrackerAddress);
+  let d = new Date(listing.expirationDate)
+  let expDateInSecs = Math.round(d.getTime() / 1000)
   console.log('Asset id:', asset.id)
   console.log('Asset term:', asset.term)
   console.log('Asset term type:', asset.termType)
@@ -47,7 +47,10 @@ exports.deployContracts = function deployContracts(asset, listing) {
   console.log('Asset cost:', asset.totalCost)
   console.log('Asset expirationDate:', expDateInSecs)
 
-  splytTracker.methods.createAsset(asset.id.toString(), asset.term, asset.termType.toString(), asset.title.toString(), asset.totalCost, expDateInSecs).send({
+  // TODO: remove this temp term reset to 0
+  let term = 0;
+
+  splytTracker.methods.createAsset(asset.id.toString(), 0, asset.termType.toString(), asset.title.toString(), asset.totalCost, expDateInSecs).send({
     from: account,
     gas: 2000000,
     gasPrice: 31000000000
