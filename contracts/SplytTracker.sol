@@ -1,6 +1,4 @@
 pragma solidity ^0.4.0;
-// Dec 18, 2017
-
 import "browser/Asset.sol";
 
 contract SplytTracker {
@@ -19,8 +17,8 @@ contract SplytTracker {
     }
 
     // Setter functions
-    function createAsset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _exiprationDate) public returns(bool) {
-        address newAsset = new Asset(_assetId, _term, _termType, _title, _totalCost, _exiprationDate);
+    function createAsset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _exiprationDate, address _mpAddress, uint _mpAmount) public returns(bool) {
+        address newAsset = new Asset(_assetId, _term, _termType, _title, _totalCost, _exiprationDate, _mpAddress, _mpAmount);
         assetIdByAddress[newAsset] = _assetId;
         addressByassetId[_assetId] = newAsset;
     }

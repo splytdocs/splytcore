@@ -1,5 +1,4 @@
 pragma solidity ^0.4.0;
-// Dec 18, 2017
 
 contract Asset {
 
@@ -11,21 +10,25 @@ contract Asset {
     uint public totalCost;
     uint public expirationDate;
     bool public isContract;
+    address public mpAddress;
+    uint public mpAmount;
 
     mapping(string => uint) contributions;
 
-    function Asset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _expirationDate) public {
+    function Asset(string _assetId, uint _term, string _termType, string _title, uint _totalCost, uint _expirationDate, address _mpAddress, uint _mpAmount) public {
         assetId = _assetId;
         term = _term;
         termType = _termType;
         title = _title;
         totalCost = _totalCost;
         expirationDate = _expirationDate;
+        mpAddress  = _mpAddress;
+        mpAmount = _mpAmount;
         isContract = true;
     }
 
-    function getAssetConfig() public constant returns(string, uint, string, uint, string, bool, uint, uint) {
-        return (assetId, term, termType, amountFunded, title, isOpenForContribution(), totalCost, expirationDate);
+    function getAssetConfig() public constant returns(string, uint, string, uint, string, bool, uint, uint, address, uint) {
+        return (assetId, term, termType, amountFunded, title, isOpenForContribution(), totalCost, expirationDate, mpAddress, mpAmount);
     }
 
     function changeTitle(string _title) public {

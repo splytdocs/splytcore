@@ -1,5 +1,4 @@
 pragma solidity ^0.4.18;
-// Dec 18, 2017
 
 import 'browser/ERC20.sol';
 
@@ -12,6 +11,8 @@ contract Asset {
     function contributePrecheck() public constant returns(bool);
     function setFunded(uint _sats) public;
     uint public totalCost;
+    uint public mpAmount;
+    address public mpAddress;
 }
 
 contract SatToken is ERC20 {
@@ -26,17 +27,22 @@ contract SatToken is ERC20 {
         description = _description;
     }
     
-    function payout(string _assetId, address _from, address _to, uint _value) {
+    function payout(string _assetId, address _from, address _to, uint _value, address _mp2Address) {
         SplytTracker splytTracker = SplytTracker(trackerAddr);
         address assetAddr = splytTracker.getAddressById(_assetId);
         Asset asset = Asset(assetAddr);
-        if(asset.contributePrecheck()){
+        if(asset.contributePrecheck()) {
             if(asset.isFractional()){
                 //TODO: Pay to contract instead of seller
                 
             } else {
                 //TODO: Pay to seller
-                bool status = transferFrom(_from, _to, asset.totalCost());
+                uint amntToSeller = asset.totalCost() - asset.mpAmount();
+                uint amntToMp2 = asset.mpAmount() / 2;
+                uint amntToMp1 = asset.mpAmount() / 2;
+                bool status1 = transferFrom(_from, _to, amntToSeller);
+                bool status2 = transferFrom(_from, _mp2Address, amntToMp2);
+                bool status3 = transferFrom(_from, asset.mpAddress(), amntToMp1);
                 asset.setFunded(asset.totalCost());
             } 
         }
