@@ -3,6 +3,7 @@ var Asset = require("../models/Asset");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 const mutatePaginationResponseOnto = require("./../app/Pagination").mutatePaginationResponseOnto;
+const statuses = require("./OwnershipStatuses").makeStatuses();
 
 function searchByQuery(criteria, meta) {
   return new Promise((resolve, reject) => {
@@ -127,5 +128,28 @@ exports.addNew = function (listingRequest) {
         resolve({data: object})
       }
     });
+  });
+};
+exports.calculateReputationScore = (userId) => {
+  const mongoUserId = new mongoose.Types.ObjectId(userId);
+  return new Promise((resolve, reject) => {
+    let score = 1;
+    this.searchByQuery({
+      "listedByUserId": mongoUserId,
+      "asset.ownership.status": statuses.funded
+    }).then((myFundedListings)=> {
+      if(myFundedListings != null) {
+        score += myFundedListings.data.length;
+      }
+      this.searchByQuery({
+        "asset.ownership.stakes.userId": mongoUserId,
+        "asset.ownership.status": statuses.funded
+      }).then((myFundedContributions)=> {
+        if(myFundedContributions != null) {
+          score += myFundedContributions.data.length;
+        }
+        resolve(score);
+      }, reject);
+    }, reject);
   });
 };

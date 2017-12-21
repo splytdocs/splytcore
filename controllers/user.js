@@ -23,6 +23,7 @@ const makeError = SingleErrorResponse.InvalidRequestError;
 const validator = CreateAccountRequest.validator;
 const uniqueCode = SingleErrorResponse.codes.unique;
 const canUserBeCreated = AccountCreation.canUserBeCreated;
+const listingsRepo = require("./../listings/contextualListingRepoService").choose();
 
 function scrubUser(user) {
   const copy = Object.assign({}, user);
@@ -127,24 +128,37 @@ exports.signupPost = function(req, res, next) {
   canUserBeCreated()({username, email}, handle);
 };
 
+function amendReputationScore(user) {
+  return new Promise((resolve, reject)=>{
+    listingsRepo.calculateReputationScore(user.id)
+    .then((score)=>{
+      user._doc.reputationScore = score;
+      resolve(score);
+    }, reject);
+  });
+}
+
 exports.accountGet = function(req, res, next) {
   User.findById(req.user.id, (err, user)=>{
     if(err) {
       return sendValidationError(res, [{message:"Something bad happened"}]);
     }
-    if(!user.walletAddress) {
-      Ethereum.createWallet()
-      .then(function(address) {
-        user.walletAddress = address;
-        user.save();
-        return send200(res, scrubUser(user));
-      }, (err)=> { send500(res, err); });
-    } else {
-      Ethereum.getWalletBalance(user.walletAddress, (err2, balance) => {
-        user.walletBalance = balance;
-        return send200(res, scrubUser(user));
-      });
-    }
+    amendReputationScore(user)
+      .then(()=> {
+      if(!user.walletAddress) {
+        Ethereum.createWallet()
+        .then(function(address) {
+          user.walletAddress = address;
+          user.save();
+          return send200(res, scrubUser(user));
+        }, (err)=> { send500(res, err); });
+      } else {
+        Ethereum.getWalletBalance(user.walletAddress, (err2, balance) => {
+          user.walletBalance = balance;
+          return send200(res, scrubUser(user));
+        });
+      }
+    });
   });
 }
 const jsonpatch = require("json-patch-mongoose");
