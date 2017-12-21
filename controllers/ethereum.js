@@ -175,3 +175,7 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
 
 exports.getWalletBalance = getWalletBalance
 exports.deactivate = deactivate;
+exports.addresses = {
+  splytTracker: splytTrackerAddress,
+  satToken: satTokenAddress,
+};

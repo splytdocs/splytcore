@@ -270,6 +270,11 @@ app.get('/api/countries',
   standardTimeout(), haltOnTimedout,
   countries.getAllCountries);
 
+const addresses = require("./controllers/addresses");
+app.get('/api/addresses', 
+  standardTimeout(), haltOnTimedout,
+  addresses.getAddresses);
+
 // Production error handler
 app.use(function(err, req, res, next) {
   console.error(err.stack);
