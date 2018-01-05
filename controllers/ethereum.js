@@ -5,7 +5,6 @@ const chalk = require('chalk')
 
 let account;
 
-
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider);
 } else {
@@ -52,11 +51,11 @@ exports.deployContracts = function deployContracts(asset, listing) {
   let term = 0;
 
   splytTracker.methods.createAsset(
-    asset.id.toString(), 
-    0, 
-    asset.termType.toString(), 
-    asset.title.toString(), 
-    asset.totalCost, 
+    asset.id.toString(),
+    0,
+    asset.termType.toString(),
+    asset.title.toString(),
+    asset.totalCost,
     expDateInSecs,
     listing.marketplace.walletAddress.toString(),
     listing.marketplace.kickbackAmount.toString()
