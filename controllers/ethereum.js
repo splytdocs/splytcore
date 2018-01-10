@@ -62,7 +62,7 @@ exports.deployContracts = function deployContracts(asset, listing) {
   ).send({
     from: account,
     gas: 2000000,
-    gasPrice: 31000000000
+    gasPrice: 700000000000
   },
   (err, trxHash) => {
     if(err) {
@@ -155,7 +155,7 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
       .send({
         from: account,
         gas: 2000000,
-        gasPrice: 31000000000
+        gasPrice: 700000000000
       },
       (err, trxHash) => {
         if(err) {
