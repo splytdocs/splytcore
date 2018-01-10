@@ -103,6 +103,7 @@ function deactivate({listing, asset}) {
 }
 
 exports.giveOutTokens = (address, cb) => {
+  
   var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
 
   satToken.methods.initUser(address).send({
