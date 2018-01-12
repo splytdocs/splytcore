@@ -1,23 +1,27 @@
 const Web3 = require('web3')
 const path = require('path')
 const fs = require('fs')
-const chalk = require('chalk')
 
 let account;
 
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider);
 } else {
-  web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETHEREUM_URI));
+  web3 = new Web3(
+    new Web3.providers.HttpProvider(
+      process.env.ETHEREUM_URI,
+      process.env.ETHEREUM_HTTP_TIMEOUT || 0
+    ));
 }
 
+console.log(`Ethereum: Attempting to connect to ethereum on '${process.env.ETHEREUM_URI}'`)
 // connection check
-web3.eth.getAccounts( function(err, res) {
+web3.eth.getAccounts(function(err, res) {
   if(err) {
-    console.error(chalk.red('Could not connect to ethereum on ', process.env.ETHEREUM_URI))
-    console.log(err)
+    console.error('Ethereum: Could not connect to ethereum on ', process.env.ETHEREUM_URI)
+    console.error(err)
   } else {
-    console.log(chalk.green('Connected to ethereum on ', process.env.ETHEREUM_URI))
+    console.log('Ethereum: Connected to ethereum on ', process.env.ETHEREUM_URI)
     account = res[0]
   }
 })
