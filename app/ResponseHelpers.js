@@ -9,6 +9,7 @@ module.exports.send500 = function(res, error) {
   res.status(500).json(toSend);
 };
 module.exports.send200 = function(res, output) {
+  if(res.headersSent) return;
   res.status(200).json(output);
 };
 module.exports.send201 = function(res, output) {

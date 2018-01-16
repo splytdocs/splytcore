@@ -153,10 +153,24 @@ exports.accountGet = function(req, res, next) {
           return send200(res, scrubUser(user));
         }, (err)=> { send500(res, err); });
       } else {
+        let ethReturned = false;
         Ethereum.getWalletBalance(user.walletAddress, (err2, balance) => {
+          ethReturned = true;
+          if(err2) {
+            console.error(`WalletError: getting wallet balance for '${user.username}'`, err2);
+            balance = 0;
+          }
           user.walletBalance = balance;
           return send200(res, scrubUser(user));
         });
+        setTimeout(()=> {
+          if(!ethReturned) {
+            console.warn(`WalletError: gave up waiting for blockchain for '${user.username}'`)
+            user.walletBalance = 0;
+            return send200(res, scrubUser(user));
+          }
+        }, 500);
+        
       }
     });
   });

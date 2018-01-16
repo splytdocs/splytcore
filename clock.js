@@ -30,7 +30,7 @@ const expirer = ListingExpirer.makeExpirer({
   blockchain
 });
 const runExpireJob = ()=>{
-  console.log(`Expire: Running expire job`, new Date());
+  console.log(`Expire job: Running expire job`, new Date());
   expirer.findActiveExpiredListingsInStore()
     .then(onFound, onError);
   function onFound(searchResults) {
