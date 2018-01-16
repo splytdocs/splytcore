@@ -65,7 +65,7 @@ exports.deployContracts = function deployContracts(asset, listing) {
   ).send({
     from: account,
     gas: 2000000,
-    gasPrice: 700000000000
+    gasPrice: 43000000000
   },
   (err, trxHash) => {
     if(err) {
@@ -112,7 +112,7 @@ exports.giveOutTokens = (address, cb) => {
   satToken.methods.initUser(address).send({
     from: account,
     gas: 4300000,
-    gasPrice: 700000000000
+    gasPrice: 43000000000
   },
   (err, trxHash) => {
     if(err) {
@@ -159,7 +159,7 @@ exports.contribute = ({amount, userId, userWalletAddress, asset, listing, contri
       .send({
         from: account,
         gas: 2000000,
-        gasPrice: 700000000000
+        gasPrice: 43000000000
       },
       (err, trxHash) => {
         if(err) {
