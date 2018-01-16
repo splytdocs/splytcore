@@ -35,8 +35,6 @@ const satTokenAddress = '0x86e7497597694041dac1f108b83bf0feb4a0bc7b'
 
 const badAddresses = ['0x0000000000000000000000000000000000000000', '0x0', '', '0x']
 
-
-
 // Will create asset contract
 exports.deployContracts = function deployContracts(asset, listing) {
 
@@ -108,7 +106,7 @@ function deactivate({listing, asset}) {
 }
 
 exports.giveOutTokens = (address, cb) => {
-  
+
   var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
 
   satToken.methods.initUser(address).send({
