@@ -1,0 +1,11 @@
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $ACCESSKEYID
+  secret_access_key:
+    secure: "$SECRETACCESSKEY"
+  region: "us-east-1"  
+  app: "SplytDemoApi"
+  env: "SplytDemoApi-env"
+  bucket_name: "splyt-travis-ci-s3"
+  on:
+    branch: master
