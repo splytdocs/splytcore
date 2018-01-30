@@ -1,17 +1,17 @@
 language: node_js
 node_js:
-  - "8"
+- '8'
 sudo: required
 deploy:
   provider: elasticbeanstalk
-  access_key_id: $ACCESSKEYID
+  access_key_id: AKIAIVUU5MY5BGECDCPQ
   secret_access_key:
-    secure: "$SECRETACCESSKEY"
-  region: "us-east-1"  
-  app: "SplytDemoApi"
-  env: "SplytDemoApi-env"
-  bucket_name: "splyt-travis-ci-s3"
+    secure: "kZsYXR8BVQvRktOF27p/Q6RMvm8msM6BbJfuSWJ2T17VLZhsNaWZwD5dj+50No8/0x/kxAZ6nlvN2JuQALLs/ezE3Hcai+/LZE6VsSVGY+vSJvGVGv5heIAO1/wobIdIiFZXxUfpYcnj8D+lHQVdXwHSRWzBlwa7GIjRVy+KoaR4nya3S8kKr1aE+rh84oKUxjJIayIfCjpFr8PtE87V0IWEgO5tOj7auqsSQowslFoG89xKiRa/mWSg3D80fEL5dqae0n3RKkiKj+qBLUcjjxWUIFEp1Wlxuasf7p12u2eOr6/cuLgr0yPJrIdkFajvLLkhc/OnH6LYjJqNAUQKRdOh7N9N0nXeYRT770E8ueoPgiF7f++XV9/xG+uJc4Hjo7BB/e2KgtkCi2D7NSCTalYlB9C9K2tzDmFCD2iso05HghMFCuTqvxoSl3avt0TtEKTokK0WHScLcJ20rme5JiQfAA0t/lIagFTF7AT0pGjWpX2ayXrr17zZUx5ovRvIwfenHwIEKfZdoKBvpTaBDFnThAO73jWBaOoUFqfOOSqcwvFPaSzqbCKcYGCmm4OiBkJ9AniIvF0XP4LSCHBoPO2NBgcH374PxnNclliW5JtDQ25V8uWzhg/27YWnyaefWgqOsUb9G++7U6QqN7cEXqBd4eJysyjnb/tmhpVFDTQ="
+  region: us-east-1
+  app: SplytDemoApi
+  env: SplytDemoApi-env
+  bucket_name: splyt-travis-ci-s3
   on:
     branch: master
 after_deploy:
-  - echo "done deploying"
+- echo "done deploying"
