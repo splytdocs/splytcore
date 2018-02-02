@@ -169,7 +169,7 @@ exports.accountGet = function(req, res, next) {
             user.walletBalance = 0;
             return send200(res, scrubUser(user));
           }
-        }, 500);
+        }, 1000);
         
       }
     });

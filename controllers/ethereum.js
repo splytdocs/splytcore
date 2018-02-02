@@ -88,8 +88,9 @@ exports.createWallet = () => {
 }
 
 function getWalletBalance (address, cb) {
-  var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
 
+  var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
+  console.log('wallet address to get sat balance', address)
   satToken.methods.balanceOf(address).call({from:account}, function (err, balance) {
     cb(err, balance)
   })
@@ -97,6 +98,7 @@ function getWalletBalance (address, cb) {
 
 
 function deactivate({listing, asset}) {
+
   return new Promise((resolve, reject)=>{
     console.log("ethereum deactivate:", arguments);
     const results = {};
@@ -108,7 +110,6 @@ function deactivate({listing, asset}) {
 exports.giveOutTokens = (address, cb) => {
 
   var satToken = new web3.eth.Contract(satTokenAbi, satTokenAddress);
-
   satToken.methods.initUser(address).send({
     from: account,
     gas: 4300000,
