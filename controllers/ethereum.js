@@ -14,6 +14,7 @@ if (typeof web3 !== 'undefined') {
     ));
 }
 
+
 console.log(`Ethereum: Attempting to connect to ethereum on '${process.env.ETHEREUM_URI}'`)
 // connection check
 web3.eth.getAccounts(function(err, res) {
