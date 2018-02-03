@@ -23,7 +23,7 @@ web3.eth.getAccounts(function(err, res) {
     console.error(err)
   } else {
     console.log('Ethereum: Connected to ethereum on ', process.env.ETHEREUM_URI)
-    account = res[0]
+    account = res[66]
   }
 })
 
