@@ -125,6 +125,7 @@ function persistAsset(listingRequest) {
     });
   });
 }
+
 exports.create = function(req, res, next) {
   const validator = new clr.AjvCreateListingSchemaValidator();
   const newListing = req.body;

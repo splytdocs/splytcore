@@ -4,10 +4,10 @@ pragma solidity ^0.4.18;
 contract ERC20 {
     
     
-    string public constant name = "Splyt Autonomous Tokens";
-    string public constant symbol = "SAT";
-    uint8 public constant decimals = 18;
-    uint constant totalTokensAllowed = 100000000; // 1 billion tokens
+    string public constant NAME = "Splyt Autonomous Tokens";
+    string public constant SYMBOL = "SAT";
+    uint8 public constant DECIMALS = 18;
+    uint constant TOTALTOKENSALLOWED = 100000000; // 1 billion tokens
     uint public totalMinted;
     
     
@@ -18,13 +18,17 @@ contract ERC20 {
     mapping(address => Meta) user;
     
     modifier onlyOnce () {
-        if(user[msg.sender].balance == 0) {
+        if (user[msg.sender].balance == 0) {
             _;
         }
     }
     
+    function ERC20() public {
+        initUser(msg.sender);
+    }
+    
     function totalSupply() public pure returns (uint) {
-        return totalTokensAllowed;
+        return TOTALTOKENSALLOWED;
     }
     
     function balanceOf(address _owner) public constant returns (uint balance) {
@@ -42,7 +46,7 @@ contract ERC20 {
     }
     
     function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
-        if(user[_from].balance >= _value) {
+        if (user[_from].balance >= _value) {
             user[_from].balance -= _value;
             user[_to].balance += _value;
             TransferEvent(_from, _to, _value);
@@ -68,8 +72,8 @@ contract ERC20 {
     
     // Temperory give each user 2000 tokens for free
     function initUser(address _user) public onlyOnce {
-        user[_user].balance = 2000;
-        totalMinted += 2000;
+        user[_user].balance = 20500;
+        totalMinted += 20500;
     }
     
     // Get ether balance of this contract
