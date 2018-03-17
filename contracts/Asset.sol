@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 // Interface contracts are interface layers to the main contracts which define a function and its input/output parameters. 
 // Use in conjuction to real contract's address, you can interact with external contract's functions using this interface layer
@@ -30,7 +30,7 @@ contract Asset {
         title = _title;
         totalCost = _totalCost;
         expirationDate = _expirationDate;
-        mpAddress = _mpAddress;
+        mpAddress  = _mpAddress;
         mpAmount = _mpAmount;
         tracker = msg.sender;
     }
@@ -48,14 +48,14 @@ contract Asset {
     }
     
     function isOpenForContribution() private constant returns (bool) {
-       if (amountFunded >= totalCost || expirationDate >= now) {
+       if(amountFunded >= totalCost || expirationDate >= now) {
            return false;
        }
        return true;
     }
     
     function isFractional() public constant returns (bool) {
-        if (term > 0) {
+        if(term > 0) {
             return true;
         } else {
             return false;
@@ -66,24 +66,24 @@ contract Asset {
         amountFunded = _amountFund;
     }
     
-    function contribute(address _buyingMarketPlace, uint _buyingMarketPlaceFee, address _contributor, uint _contributing) public {
+    function contribute(address _buyingMarketPlace, uint _buyingMarketPlaceFee, address _contributor, uint _contributing) {
         // Check if expirationDate is greater than now then listing is closed
-        if (isOpenForContribution()) {
+        if(isOpenForContribution()) {
             revert();
         }
         
         SplytTrackerInterface splytTracker = SplytTrackerInterface(tracker);
         bool result;
         
-        if (isFractional()) {
+        if(isFractional()) {
             result = splytTracker.contribute(_contributor, this, _contributing);
-            if (result == true) {
+            if(result == true) {
                 addToContributions(_contributor, _contributing);
             }
             
-        } else if (_contributing >= totalCost) {
+        } else if(_contributing >= totalCost) {
             result = splytTracker.contribute(_contributor, seller, _contributing);
-            if (result == true) {
+            if(result == true) {
                 addToContributions(_contributor, _contributing);
             }
 

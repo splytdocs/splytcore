@@ -1,0 +1,40 @@
+satToken init: "SAT", "splyt anonymous tokens", 3
+splytTracker init: 3, "splyt", "0x692a70d2e424a56d2c6c27aa97d1a86395877b3a"
+
+ create asset: "0x5a396abf23663a0013fbb0b2", 1, "WEEK", "Coffee for sale", 350, 1519042031, "0x951d59b8Be3bfe2473572F04E3aFe315D48E2c3B", 5
+
+ "0x5a396abf23663a0013fbb0b2"
+
+
+Contract Addresses:
+  SatToken: 0xf187b33d332caa93582ef77699140a560cb5c2de
+  SplytTracker: 0x504a37ea0f3751898eb908b54574afce754456c0
+  Asset: 0x30e03f3a791a981a6b471b9d6e2a332f9805e021
+
+
+Deploy/Setup contracts instructions:
+  1. Deploy SatToken.sol using these parameters: "splyt", "splyt token contract", 4
+  2. Deploy SplytTracker.sol using these parameters: 4, "splyt", [SatToken contract address from step 1]
+  3. Call SatToken.setTrackerAddr function to set SplytTracker address: [SplytTracker contract address from step 2]
+  
+Everything is setup at this point.
+
+
+Creating a Fractional listing:
+  1. Call SplytTracker.createAsset function to create an asset: "0x5a396abf23663a0013fbb0b3", 1, "WEEK", "Coffee for sale", 350, 1621239891, "0x951d59b8Be3bfe2473572F04E3aFe315D48E2c3B", 4
+  2. Call SplytTracker.getAddressById function to get asset's contract address from step 1: "0x5a396abf23663a0013fbb0b3"
+  3. Create an asset contract by using the returned address from step 2: "0x30e03f3a791a981a6b471b9d6e2a332f9805e021"
+
+Contributing to a Fractional Listing:
+  1. Call Asset.contribute function using these parameters: "0xd9e5e4bde24faa2b277ab2be78c95b9ae24259a8", 4, "0x951d59b8be3bfe2473572f04e3afe315d48e2c3b", 30
+
+
+TOOD: 
+ - Asset.seller is 0x000000..0 instead of seller wallet address
+ - Asset.contribute needs public access, currently there's nothing there
+ - Asset.isOpenForContributions should also check if incoming contribution will go over the total value, if it will revert()
+ - Asset.contribute don't allow 3rd person to contribute using your wallet address.
+
+Discussion:
+ - Season tickets expires end of year/end of 12 month finished. House never expires. You own xx% of it forever.
+ - If house is fractionally listed, for 365 days aka 1 year, the only slots and term combo that works is 1 day slot, 365 days term; 5 days slot, 365 days term.

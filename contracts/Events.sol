@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 // This contract will handle all events that needs to be emitted. 
 // Some of them includes: success events, error events. 

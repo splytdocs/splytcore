@@ -2,18 +2,18 @@ pragma solidity ^0.4.19;
 
 import 'browser/ERC20.sol';
 
-contract SplytTracker {
-    function getAddressById (string _assetId) public constant returns (address);
-}
+// contract SplytTrackerInterface {
+//     function getAddressById (string _assetId) public constant returns (address);
+// }
 
-contract Asset {
-    function isFractional() public constant returns (bool);
-    function contributePrecheck() public constant returns(bool);
-    function setFunded(uint _sats) public;
-    uint public totalCost;
-    uint public mpAmount;
-    address public mpAddress;
-}
+// contract AssetInterface {
+//     function isFractional() public constant returns (bool);
+//     function contributePrecheck() public constant returns(bool);
+//     function setFunded(uint _sats) public;
+//     uint public totalCost;
+//     uint public mpAmount;
+//     address public mpAddress;
+// }
 
 contract SatToken is ERC20 {
     string name;
