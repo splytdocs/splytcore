@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import 'browser/ERC20.sol';
+import "./ERC20.sol";
 
 // contract SplytTrackerInterface {
 //     function getAddressById (string _assetId) public constant returns (address);
@@ -55,4 +55,7 @@ contract SatToken is ERC20 {
     
     //TODO: Put splyt related $$ transfer logic here
 }
+
+
+
 

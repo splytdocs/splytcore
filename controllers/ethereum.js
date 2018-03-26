@@ -128,7 +128,7 @@ exports.giveOutTokens = (address, cb) => {
     cb(null, null)
   })
   .error(err => {
-    console.log('Could not sent transaction to iniUser()')
+    console.log('Could not send transaction to iniUser()')
     console.log(err)
     cb(null, null)
   })

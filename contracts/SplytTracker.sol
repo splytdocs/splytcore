@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 
-import "browser/Asset.sol";
-import "browser/Events.sol";
+import "./Asset.sol";
+import "./Events.sol";
 
 contract SatTokenInterface {
     function transferFrom(address _from, address _to, uint _value) public returns (bool success);

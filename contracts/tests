@@ -31,7 +31,6 @@ Contributing to a Fractional Listing:
 
 TOOD: 
  - Asset.seller is 0x000000..0 instead of seller wallet address
- - Asset.contribute needs public access, currently there's nothing there
  - Asset.isOpenForContributions should also check if incoming contribution will go over the total value, if it will revert()
  - Asset.contribute don't allow 3rd person to contribute using your wallet address.
 
