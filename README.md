@@ -33,18 +33,6 @@ Deploying contract to blockchain:
 - Set a wallet variable that's {from: web3.eth.accounts[0], gas: 200000 }
 - If your contract has constructors. Then you'll need to define them
 
-
-
-
-
-
-
-
-
-
-
-
-
 ---------------------------------------------------
 
 
