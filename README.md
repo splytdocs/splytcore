@@ -26,37 +26,40 @@
 - By now you should have fake ether sent to your wallet. Check it by sending this command in geth terminal. ```web3.eth.getBalance(web3.eth.accounts[0]```) . If it says zero. Then you haven't recieved ether. try step 10 again.
 ---
 ## Getting started
-1. [Server + Client side market place](#server--client-side-market-place)
-2. [Client side market place](#client-side-market-place)
-3. [Ethereum.js Library](#ethereumjs-library)
-4. [Things needed from a market place builder](#things-needed-from-a-market-place-builder)
-5. [Things needed from a user of a market place](#things-needed-from-a-user-of-a-market-place)
-6. [How to create a listing](#how-to-create-a-listing)
-7. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
+1. [Server Architecture](#server-architecture)
+1. [Connecting to Ethereum](#connecting-to-ethereum)
+1. [Client side market place](#client-side-market-place)
+1. [Ethereum.js Library](#ethereumjs-library)
+1. [Things needed from a market place builder](#things-needed-from-a-market-place-builder)
+1. [Things needed from a user of a market place](#things-needed-from-a-user-of-a-market-place)
+1. [How to create a listing](#how-to-create-a-listing)
+1. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
 
-#### Architecture 
+
+## Server architecture 
 Today we use a traditional client-server architecture for our Splyt demo. It consists of a Geth server, and a RESTful API written in Node.JS using Express, and MongoDB to . The marketplace websites use a PHP backend to communicate with the API, and normal front-end technologies on the client side. 
 
 Be sure not to expose your Geth server to the internet. Consider keeping it within your own network and allow only connections from authorized hosts, like your API server.
 
-#### Connecting to Ethereum
+### Configuration
+- **Platform:** node
+- **Framework**: express
+- **Database**: mongodb
+
+### Connecting to Ethereum
 In `ethereum.js` you'll find the functions to interact with Ethereum using Splyt's smart contracts. It expects an environment variable of `ETHEREUM_URI`, which is the URI to Geth server. It should be something like `http://127.0.0.1:8585` depending on your network and Geth configuration. 
 
-### Client side market place
-> Using ethereum.js file on client-side. how to either use a hosted geth server as a market place owner or have user sync their own node. Explaining security benefits of using client-side only structure. 
-
-### Things needed from a user of a market place
-> Ability to send transactions from user's wallet, either metamask, or personal wallet, some ether amount and bunch of SAT tokens
-
 ### Ethereum.js Library
-We use the Web3 package to communicate with our Geth server. https://github.com/ethereum/web3.js/
+We use the Web3 package to communicate with our Geth server. <https://github.com/ethereum/web3.js/>
 Our `ethereum.js` module wraps those interactions, so you shouldn't need to use web3 directly for Splyt transactions. Just be sure to set the `ETHEREUM_URI` environment variable mentioned earlier.
 
 ### Create a Listing
 Ethereum transactions do not resolve immediately, which requires a different mindset in making your application. When a user creates a listing, it may take a great deal of time for that transaction to be entirely processed, and could fail for any number of reasons. Obviously, you won't want to wait that long to give a response to your user. The recommended approach is to create a unique identifier, and store a correlation record in your own database with that identifier. You'll listen for the resolution of that listing event, and then updating your record accordingly with the Ethereum result.
 
+The `ethereum.deployContracts` function submits your listing to Ethereum. It expects two parameters, information about the asset in the listing, and information about the listing itself, including the marketplace. Currently, nothing is returned as it is expected that your application will listen for the eventual completion of this event, explained later in this document.
 
-The `ethereum.deployContracts` function submits your listing to Ethereum. It expects two parameters, information about the asset in the listing, and information about the listing itself, including the marketplace. Expect these signatures to change as we alter the object model and evolve the Splyt contracts.
+**Anticipate breaking changes as we iterate on, and improve the API. It is likely to be changed and simplified.**
+
 ```js
 const ethereum = require("./controllers/ethereum.js");
 const uuidv4 = require("uuid/v4"); // https://www.npmjs.com/package/uuid
@@ -87,20 +90,44 @@ ethereum.deployContracts(asset, {
   expirationDate,
   marketplace
 });
-
 ```
 
 ### How to own/fractionally own a listing
-> Explain the steps needed to own a listing, AKA explain `contribute` function in ethereum.js file
+For non-fractional listings one must contribute the full amount of SATs for the asset. For fractional assets, partial amounts are acceptable. 
+
+**Anticipate breaking changes as we iterate on, and improve the API. It is likely to be changed and simplified.**
+
+```json
+  const ethereum = require("./controllers/ethereum.js");
+  const contribution = {
+    // The amount of SATs the user is attempting to contribute
+    amount: 4000,
+    // The address of the contributor's wallet
+    userWalletAddress:"0x...",
+    asset:{
+      // Whether this asset is fractionally owned (coming soon!)
+      isFractional: false,
+      // Your correlation ID for this asset, generated when the listing was created
+      id: "f9acaf3d-276a...",
+    },
+    // The address of the user selling this asset
+    listing:{listedByWalletAddress:"0x..."}
+  }
+  ethereum.contribute(contribution)
+```
+
+A Promise is returned from this function. If there is an immediately-detectable error, it will contain that information. Otherwise, it is resolved successfully, and your application will listen for the eventual completion of this event, explained later in this document.
+
+### Responding to Ethereum events to update your database
+Coming soon!
+
+### Client side market place
+Coming soon!
+
+### Things needed from a user of a market place
+Coming Soon!
+
 ---------------------------------------------------
-
-
-## Server architecture 
-
-### Configuration
-- **Platform:** node
-- **Framework**: express
-- **Database**: mongodb
 
 ### License
 The MIT License (MIT)
