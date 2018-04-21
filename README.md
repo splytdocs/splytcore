@@ -97,23 +97,24 @@ For non-fractional listings one must contribute the full amount of SATs for the 
 
 **Anticipate breaking changes as we iterate on, and improve the API. It is likely to be changed and simplified.**
 
-```json
-  const ethereum = require("./controllers/ethereum.js");
-  const contribution = {
-    // The amount of SATs the user is attempting to contribute
-    amount: 4000,
-    // The address of the contributor's wallet
-    userWalletAddress:"0x...",
-    asset:{
-      // Whether this asset is fractionally owned (coming soon!)
-      isFractional: false,
-      // Your correlation ID for this asset, generated when the listing was created
-      id: "f9acaf3d-276a...",
-    },
-    // The address of the user selling this asset
-    listing:{listedByWalletAddress:"0x..."}
-  }
-  ethereum.contribute(contribution)
+```js
+const ethereum = require("./controllers/ethereum.js");
+
+const contribution = {
+  // The amount of SATs the user is attempting to contribute
+  amount: 4000,
+  // The address of the contributor's wallet
+  userWalletAddress: "0x...",
+  asset: {
+    // Whether this asset is fractionally owned (coming soon!)
+    isFractional: false,
+    // Your correlation ID for this asset, generated when the listing was created
+    id: "f9acaf3d-276a..."
+  },
+  // The address of the user selling this asset
+  listing: { listedByWalletAddress: "0x..." }
+};
+ethereum.contribute(contribution);
 ```
 
 A Promise is returned from this function. If there is an immediately-detectable error, it will contain that information. Otherwise, it is resolved successfully, and your application will listen for the eventual completion of this event, explained later in this document.
