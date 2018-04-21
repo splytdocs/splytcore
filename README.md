@@ -1,5 +1,15 @@
+# Getting started
+1. [Setting up your Geth Server](#setting-up-your-geth-server)
+1. [Server Architecture](#server-architecture)
+1. [Connecting to Ethereum](#connecting-to-ethereum)
+1. [Ethereum.js Library](#ethereumjs-library)
+1. [Create a Listing](#create-a-listing)
+1. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
+1. [Responding to Ethereum events to update your database](#responding-to-ethereum-events-to-update-your-database)
+1. [Client side market place](#client-side-market-place)
+1. [Things needed from a user of a market place](#things-needed-from-a-user-of-a-market-place)
 
-## Preface
+## Setting up your Geth Server
 
 ### Downloading geth client:
 
@@ -25,16 +35,6 @@
 - Rename the files ```Contractname.bin``` and ```Contractname.abi``` respectively.
 - By now you should have fake ether sent to your wallet. Check it by sending this command in geth terminal. ```web3.eth.getBalance(web3.eth.accounts[0]```) . If it says zero. Then you haven't recieved ether. try step 10 again.
 ---
-## Getting started
-1. [Server Architecture](#server-architecture)
-1. [Connecting to Ethereum](#connecting-to-ethereum)
-1. [Client side market place](#client-side-market-place)
-1. [Ethereum.js Library](#ethereumjs-library)
-1. [Things needed from a market place builder](#things-needed-from-a-market-place-builder)
-1. [Things needed from a user of a market place](#things-needed-from-a-user-of-a-market-place)
-1. [How to create a listing](#how-to-create-a-listing)
-1. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
-
 
 ## Server architecture 
 Today we use a traditional client-server architecture for our Splyt demo. It consists of a Geth server, and a RESTful API written in Node.JS using Express, and MongoDB to . The marketplace websites use a PHP backend to communicate with the API, and normal front-end technologies on the client side. 
