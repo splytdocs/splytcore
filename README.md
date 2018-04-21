@@ -34,24 +34,62 @@
 6. [How to create a listing](#how-to-create-a-listing)
 7. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
 
+#### Architecture 
+Today we use a traditional client-server architecture for our Splyt demo. It consists of a Geth server, and a RESTful API written in Node.JS using Express, and MongoDB to . The marketplace websites use a PHP backend to communicate with the API, and normal front-end technologies on the client side. 
 
-### Server + Client side market place
+Be sure not to expose your Geth server to the internet. Consider keeping it within your own network and allow only connections from authorized hosts, like your API server.
 
-> Write about the traditional client + server architecture we have currently in our demo. For ex., Where to put geth server, how to connect to geth securely, saving just empty listing object in DB which will give unique objectId which you can use to send a transaction to blockchain, then saving more meta in DB upon receiving the events. And when does ethereum.js file come to play in this structure.
+#### Connecting to Ethereum
+In `ethereum.js` you'll find the functions to interact with Ethereum using Splyt's smart contracts. It expects an environment variable of `ETHEREUM_URI`, which is the URI to Geth server. It should be something like `http://127.0.0.1:8585` depending on your network and Geth configuration. 
 
 ### Client side market place
-
 > Using ethereum.js file on client-side. how to either use a hosted geth server as a market place owner or have user sync their own node. Explaining security benefits of using client-side only structure. 
 
-### Ethereum.js Library
-> How to connect to a geth client, how to keep connection alive or keep checking to see if connection is active or not. What to do when an event gets triggered. (Save in mongodb - server side or save it in leveldb - client side). Explain overall reasoning behind ethereum.js library and overall structure of it.
-
-### Things needed from a market place builder
-> Unique identifier for listings IDs, market place wallet address, marketplace kickback amount
 ### Things needed from a user of a market place
 > Ability to send transactions from user's wallet, either metamask, or personal wallet, some ether amount and bunch of SAT tokens
-### How to create a listing
-> Explain the steps needed to create a listing AKA explain `deployContracts` function in ethereum.js file
+
+### Ethereum.js Library
+We use the Web3 package to communicate with our Geth server. https://github.com/ethereum/web3.js/
+Our `ethereum.js` module wraps those interactions, so you shouldn't need to use web3 directly for Splyt transactions. Just be sure to set the `ETHEREUM_URI` environment variable mentioned earlier.
+
+### Create a Listing
+Ethereum transactions do not resolve immediately, which requires a different mindset in making your application. When a user creates a listing, it may take a great deal of time for that transaction to be entirely processed, and could fail for any number of reasons. Obviously, you won't want to wait that long to give a response to your user. The recommended approach is to create a unique identifier, and store a correlation record in your own database with that identifier. You'll listen for the resolution of that listing event, and then updating your record accordingly with the Ethereum result.
+
+
+The `ethereum.deployContracts` function submits your listing to Ethereum. It expects two parameters, information about the asset in the listing, and information about the listing itself, including the marketplace. Expect these signatures to change as we alter the object model and evolve the Splyt contracts.
+```js
+const ethereum = require("./controllers/ethereum.js");
+const uuidv4 = require("uuid/v4"); // https://www.npmjs.com/package/uuid
+
+// The date this listing should expire, such as in thirty days
+const expirationDate = new Date();
+expirationDate.setDate(expirationDate.getDate() + 30);
+
+const asset = {
+  // Your unique identifier for this asset
+  id: uuidv4().toString(),
+  // The string ID of the terms for ownership of this asset.
+  // Right now we only support DAYS, but will be expanding this to other
+  // terms as the product grows.
+  termType: "DAYS",
+  // The title or short description of the asset
+  title: "Contemporary Art",
+  // The integer amount of SATs for all costs for this asset
+  totalCost: 32168
+};
+const marketplace = {
+  // The wallet address of the marketplace creating this listing
+  walletAddress: process.env.MARKETPLACE_WALLET_ADDRESS,
+  // The integer percent of the final amount that will be given to the marketplace which completes the sale of this listing
+  kickbackAmount: 5
+};
+ethereum.deployContracts(asset, {
+  expirationDate,
+  marketplace
+});
+
+```
+
 ### How to own/fractionally own a listing
 > Explain the steps needed to own a listing, AKA explain `contribute` function in ethereum.js file
 ---------------------------------------------------
@@ -62,15 +100,7 @@
 ### Configuration
 - **Platform:** node
 - **Framework**: express
-- **Template Engine**: jade
-- **CSS Framework**: none
-- **CSS Preprocessor**: css
-- **JavaScript Framework**: 
-- **Build Tool**: none
-- **Unit Testing**: none
 - **Database**: mongodb
-- **Authentication**: facebook,email,google,twitter
-- **Deployment**: Staging
 
 ### License
 The MIT License (MIT)
