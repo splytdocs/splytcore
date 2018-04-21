@@ -26,13 +26,13 @@ Downloading public testnet:
 - By now you should have fake ether sent to your wallet. Check it by sending this command in geth terminal. ```web3.eth.getBalance(web3.eth.accounts[0]```) . If it says zero. Then you haven't recieved ether. try step 10 again.
 ---
 ## Getting started
-1. [Server + Client side market place](#Server-+-Client-side-market-place)
-2. [Client side market place](#Client-side-market-place)
-3. [Ethereum.js Library](#Ethereum.js-Library)
-4. [Things needed from a market place builder](#Things-needed-from-a-market-place-builder)
-5. [Things needed from a user of a market place](#Things-needed-from-a-user-of-a-market-place)
-6. [How to create a listing](#How-to-create-a-listing)
-7. [How to own/fractionally own a listing](#How-to-own/fractionally-own-a-listing)
+1. [Server + Client side market place](#server--client-side-market-place)
+2. [Client side market place](#client-side-market-place)
+3. [Ethereum.js Library](#ethereumjs-library)
+4. [Things needed from a market place builder](#things-needed-from-a-market-place-builder)
+5. [Things needed from a user of a market place](#things-needed-from-a-user-of-a-market-place)
+6. [How to create a listing](#how-to-create-a-listing)
+7. [How to own/fractionally own a listing](#how-to-ownfractionally-own-a-listing)
 
 
 ### Server + Client side market place
