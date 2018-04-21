@@ -66,7 +66,7 @@ const expirationDate = new Date();
 expirationDate.setDate(expirationDate.getDate() + 30);
 
 const asset = {
-  // Your unique identifier for this asset
+  // Your unique correlation ID for this asset
   id: uuidv4().toString(),
   // The string ID of the terms for ownership of this asset.
   // Right now we only support DAYS, but will be expanding this to other
