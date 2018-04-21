@@ -1,6 +1,6 @@
 # Getting started
 1. [Setting up your Geth Server](#setting-up-your-geth-server)
-1. [Server Architecture](#server-architecture)
+1. [Backend Server Architecture](#backend-server-architecture)
 1. [Connecting to Ethereum](#connecting-to-ethereum)
 1. [Ethereum.js Library](#ethereumjs-library)
 1. [Create a Listing](#create-a-listing)
@@ -36,7 +36,7 @@
 - By now you should have fake ether sent to your wallet. Check it by sending this command in geth terminal. ```web3.eth.getBalance(web3.eth.accounts[0]```) . If it says zero. Then you haven't recieved ether. try step 10 again.
 ---
 
-## Server architecture 
+## Backend Server Architecture 
 Today we use a traditional client-server architecture for our Splyt demo. It consists of a Geth server, and a RESTful API written in Node.JS using Express, and MongoDB to . The marketplace websites use a PHP backend to communicate with the API, and normal front-end technologies on the client side. 
 
 Be sure not to expose your Geth server to the internet. Consider keeping it within your own network and allow only connections from authorized hosts, like your API server.
