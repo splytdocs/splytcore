@@ -1,18 +1,18 @@
 
 ## Preface
 
-Downloading geth client:
+### Downloading geth client:
 
 - Download ethereum client (geth) from [here](https://geth.ethereum.org/downloads/).
 -  Extract it to a desired location.
 -  Open terminal and cd to the folder where geth is located.
 
-Creating a wallet:
+### Creating a wallet:
 
 -  Then type ```./geth --testnet account new``` in the terminal to create a new testnet wallet.
 -  Geth client will prompt you to enter password `twice` to create a wallet.
 
-Downloading public testnet:
+### Downloading public testnet:
 
 -  Type in terminal ```./geth --testnet --verbosity 1 console .``` This will sync the Ropsten testnet to your computer.
 -  Current block # for Ropsten is # 3,077,160 at the time of writing. So sit back and wait until your node downloads all the blocks up till the current block.
